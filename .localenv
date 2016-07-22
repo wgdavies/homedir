@@ -1,0 +1,31 @@
+# Local modifications particular to this host
+#
+[ -x /usr/bin/go ] && export GOROOT=/usr
+[ -x /usr/local/bin/go ] && export GOROOT=/usr/local
+[ -d /opt/go ] && export GOROOT=/opt/go && PATH=${PATH}:${GOROOT}/bin
+[ -d /opt/node ] && export NODE=/opt/node && PATH=${PATH}:${NODE}/bin
+[ -d ~/bin ] && PATH=${PATH}:~/bin
+
+export SVN_EDITOR=jove
+
+#typeset -i snum=$(tty | sed 's;.*/;;')
+typeset -i snum=$(w | egrep '^wdavie' | wc -l)
+
+if [[ ! $(typeset -r) =~ HIST ]]; then
+	export HISTSIZE=32767
+	export HISTFILE=~/.hist.${snum}
+	
+	touch ${HISTFILE}
+fi
+
+if [[ -r ~/.tasks ]]; then
+	print "Current projects / tasks:"
+	
+	if [[ -s ~/.tasks ]]; then
+		cat ~/.tasks
+	else
+		print "None... find something to do!"
+	fi
+fi
+
+cd
