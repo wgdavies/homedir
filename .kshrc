@@ -13,24 +13,41 @@ fi
 
 export LC_ALL="C"
 export LANG="en_GB.UTF-8"
-export OS=$(uname -o)
+export OS=$(uname -s)
 export HOSTNAME=$(hostname -s)
+export PRD=${PWD/$HOME\//}
 
 # Conditional PATH updates
 #
-export APP_HOME=/opt/app/home
-
-for newpath in ${APP_HOME}; do
-	if [[ -d ${newpath} ]]; then
-		PATH=${PATH}:${newpath}/bin
+for DIR in /opt/*/bin; do
+	if [[ -r ${DIR} ]]; then
+		PATH+=:${DIR}
 	fi
 done
 
+if [[ -d ~/code/Mac/Homebrew ]]; then
+	export BREW_HOME=~/code/Mac/Homebrew/brew
+	PATH+=:${BREW_HOME}/bin
+	
+	for DIR in ${BREW_HOME}/opt/*/bin; do
+		PATH+=:${DIR}
+	done
+fi
+
+if [[ -d ~/bin/tlpkg ]]; then
+	export PERL5LIB=/Library/Perl/5.18/darwin-thread-multi-2level:/Library/Perl/5.18:/Network/Library/Perl/5.18/darwin-thread-multi-2level:/Network/Library/Perl/5.18:/Library/Perl/Updates/5.18.2:/System/Library/Perl/5.18/darwin-thread-multi-2level:/System/Library/Perl/5.18:/System/Library/Perl/Extras/5.18/darwin-thread-multi-2level:/System/Library/Perl/Extras/5.18:/Users/wdavie/bin/texmf-dist/scripts/texlive:/Users/wdavie/bin/tlpkg
+fi
+
 # User specific aliases and functions
 #
-if [[ ${OS} == FreeBSD ]]; then
+if [[ ${OS} == FreeBSD ]];then
+	typeset MD5=$(which md5)
 	alias ls='ls -G -D "%Y-%m-%d %H:%M"'
-elif [[ ${OS} == GNU/Linux ]]; then
+elif [[ ${OS} == Darwin ]]; then
+	typeset MD5=$(which md5)
+	alias ls='ls -G'
+elif [[ ${OS} =~ Linux ]]; then
+	typeset MD5=$(which md5sum)
 	alias ls='ls --color'
 	export TIME_STYLE=long-iso
 else
@@ -51,15 +68,52 @@ alias fgk='export COL_NORM=${COL_BLACK}'
 alias fgg='export COL_NORM=${COL_GREY}'
 alias fgy='export COL_NORM=${COL_GREEN}'
 
-# Various other nodes and aliases
-alias gss='git status -s'
-alias gca='git commit -a'
-
 # Some other useful alises
-alias line='grep -n'
+alias line='grep -n --colour'
 
 # Useful functions
 #
+function .sh.math.fac n {
+	typeset -li f=1 i
+
+	for (( i = 2 ; i <= n ; ++i )); do
+		(( f *= i ))
+	done
+
+	(( .sh.value = f ))
+}
+
+function md5ign
+{
+	typeset md5ign_file md5ign_sign
+	
+	for md5ign_file in ${@}; do
+		md5ign_sign=$(egrep -v '#.*' ${md5ign_file} | LC_ALL=C sort -bdf | tr -d '[:space:]' | ${MD5})
+		printf "%s %s\n" "${md5ign_sign}" "${md5ign_file}"
+	done
+}
+
+function md5dir
+{
+	typeset dirname
+	typeset -i rcsv
+	
+	case ${1} in
+		-r) (( rcsv = 1 )); dirname=${2:-.} ;;
+		*) dirname=${1} ;;
+	esac
+
+	if (( rcsv == 1 )); then
+		find ${dirname} -type f -exec ${MD5} {} \;
+	else
+		if [[ -d ${dirname} ]]; then
+			tar -cf - ${dirname} | ${MD5}
+		else
+			print -u2 "md5dir error: ${dirname} does not exist or is not a directory"
+		fi
+	fi
+}
+
 function man2pdf
 {
     typeset -a mans=( $@ )
@@ -118,21 +172,21 @@ function where {
 function xdate {
 	typeset datestamp datestring datearg;
 
-	if (( $# > 0 )); then
-		for datearg in $@; do
+	if (( ${#} > 0 )); then
+		for datearg in ${@}; do
 			if [[ ${datearg} =~ [0-9,a-f,A-F] ]]; then
 				if [[ ${datearg} =~ 0x ]]; then
 					datestamp=$(printf "%d" ${datearg})
 				else
 					datestamp=$(printf "%d" 0x${datearg})
 				fi
-				datestring=$(date -d @${datestamp} +"%FT%T")
+				datestring=$(printf '%(%FT%T)T' '#'${datestamp})
 			else
-				datestring=$(printf "%X" $1)
+				datestring=$(printf "%X" ${1})
 			fi
 		done
 	else
-		datestring=$(printf "%X" $(date +"%s"))
+		datestring=$(printf "%X" $(printf '%(%s)T' now))
 	fi
 
 	print ${datestring}
@@ -186,10 +240,10 @@ export COL_GREY=""
 typeset CURRDIR
 typeset STATA
 
-typeset -i infocols=72 columns=$(tput cols)
+typeset -i infocols=24 columns=$(tput cols)
 
 case "${TERM}" in
-	xterm|vt100|screen|eterm-color)
+	xterm*|vt100|screen|eterm-color)
 		if [[ -x $(type -p tput) ]]; then
 			COL_BOLD="$(tput smso)"
 			COL_UNBOLD="$(tput rmso)"
@@ -199,16 +253,30 @@ case "${TERM}" in
 			COL_YELLOW="$(tput setaf 3)"
 			COL_BLUE="$(tput setaf 4)"
 			COL_GREY="$(tput setaf 6)"
+			COL_LTGREY="$(tput setaf 7)"
+			COL_DKGREY="$(tput setaf 8)"
 			COL_WHITE="$(tput setaf 9)"
-			COL_NORM="${COL_GREY}"
+			COL_NORM="${COL_DKGREY}"
 		fi
 		;;
+esac
+
+typeset hn
+case ${HOSTNAME} in
+	PHX*) hn="";;
+	*) hn="@${HOSTNAME}";;
 esac
 
 strata() {
 	if [[ -z ${hosttype} ]]; then
 		case ${HOSTNAME} in
+			PHX*) hosttype="Lo";;
 			*sv*) hosttype="VM";;
+			lppbd00b5) hosttype="He" ;;
+			lpdbd*) hosttype="Cu" ;;
+			lppbd*) hosttype="Ag" ;;
+			lgpbd0*) hosttype="Pt" ;;
+			lgpbd*) hosttype="Au" ;;
 		esac
 	fi
 	
@@ -217,7 +285,7 @@ strata() {
 }
 
 typeset STRATA="$(strata)"
-typeset WHOWHERE="$(whoami)@${HOSTNAME}"
+typeset WHOWHERE="$(whoami)${hn}"
 typeset INFOLINE="${SHELL}"
 typeset SLINE=""
 typeset BRANCH=""
@@ -233,9 +301,12 @@ is_gitrepo() {
 	exit 1
 }
 
+typeset -a VCSINFO=( )
+
 cd() {
 	command cd "$@"
 	columns=$(tput cols)
+	PRD=${PWD/$HOME\//}
 	
 	if [[ -r ./.svn/all-wcprops ]]; then
 		VCSINFO=( $(sed -n 's/^\/svn\/repos\///g;s/\/\!/ /g;s/svn\/ver\///g;s/\([0-9]*\)\//\1:\//p' ./.svn/all-wcprops) )
@@ -256,6 +327,9 @@ cd() {
 			git status 2>&1 | grep -q modified:
 			if (( $? == 0 )); then SLINE="${COL_RED}"; else SLINE="${COL_WHITE}"; fi
 			cwd="$(print ${PWD#$HOME/code/Git/GitLab/} | tr -d "[:alnum:]_.-")$(basename ${PWD})"
+			
+			if [[ ${VCSINFO[0]} =~ stash.aexp.com ]]; then VCSINFO[0]="Stash"; fi
+
 			CURRDIR="$(printf "%sGit %s %s%s:%s%s%s \"%s\"" "${COL_BLUE}" ${VCSINFO[0]} "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${cwd}" "${COL_NORM}" "${BRANCH}")"
 		fi
 	else
@@ -264,7 +338,8 @@ cd() {
 		CURRDIR="${COL_GREEN}$(print ${cwd} | tr -d "[:alnum:]_.-")$(basename ${PWD})${COL_NORM}"
 	fi
 
-	if (( infocols + ${#VCSINFO[0]} + ${#VCSINFO[1]} > columns )); then
+#	if (( infocols + ${#VCSINFO[0]} + ${#VCSINFO[1]} > columns )); then
+	if (( infocols + ${#CURRDIR} > columns )); then
 		INFOLINE="${COL_BOLD}${STRATA}${COL_UNBOLD}"
 	else
 		INFOLINE="${WHOWHERE} ${COL_BOLD}${STRATA}${COL_UNBOLD}"
