@@ -19,24 +19,7 @@ export PRD=${PWD/$HOME\//}
 
 # Conditional PATH updates
 #
-for DIR in /opt/*/bin; do
-	if [[ -r ${DIR} ]]; then
-		PATH+=:${DIR}
-	fi
-done
-
-if [[ -d ~/code/Mac/Homebrew ]]; then
-	export BREW_HOME=~/code/Mac/Homebrew/brew
-	PATH+=:${BREW_HOME}/bin
-	
-	for DIR in ${BREW_HOME}/opt/*/bin; do
-		PATH+=:${DIR}
-	done
-fi
-
-if [[ -d ~/bin/tlpkg ]]; then
-	export PERL5LIB=/Library/Perl/5.18/darwin-thread-multi-2level:/Library/Perl/5.18:/Network/Library/Perl/5.18/darwin-thread-multi-2level:/Network/Library/Perl/5.18:/Library/Perl/Updates/5.18.2:/System/Library/Perl/5.18/darwin-thread-multi-2level:/System/Library/Perl/5.18:/System/Library/Perl/Extras/5.18/darwin-thread-multi-2level:/System/Library/Perl/Extras/5.18:/Users/wdavie/bin/texmf-dist/scripts/texlive:/Users/wdavie/bin/tlpkg
-fi
+[[ -d ~/bin ]] && PATH=${PATH}:~/bin
 
 # User specific aliases and functions
 #
@@ -73,7 +56,8 @@ alias line='grep -n --colour'
 
 # Useful functions
 #
-function .sh.math.fac n {
+function .sh.math.fac n
+{
 	typeset -li f=1 i
 
 	for (( i = 2 ; i <= n ; ++i )); do
@@ -243,45 +227,39 @@ typeset STATA
 typeset -i infocols=24 columns=$(tput cols)
 
 case "${TERM}" in
-	xterm*|vt100|screen|eterm-color)
-		if [[ -x $(type -p tput) ]]; then
-			COL_BOLD="$(tput smso)"
-			COL_UNBOLD="$(tput rmso)"
-			COL_BLACK="$(tput setaf 0)"
-			COL_RED="$(tput setaf 1)"
-			COL_GREEN="$(tput setaf 2)"
-			COL_YELLOW="$(tput setaf 3)"
-			COL_BLUE="$(tput setaf 4)"
-			COL_GREY="$(tput setaf 6)"
-			COL_LTGREY="$(tput setaf 7)"
-			COL_DKGREY="$(tput setaf 8)"
-			COL_WHITE="$(tput setaf 9)"
-			COL_NORM="${COL_DKGREY}"
-		fi
-		;;
+    xterm*|vt100|screen|eterm-color)
+	if [[ -x $(type -p tput) ]]; then
+	    COL_BOLD="$(tput smso)"
+	    COL_UNBOLD="$(tput rmso)"
+	    COL_BLACK="$(tput setaf 0)"
+	    COL_RED="$(tput setaf 1)"
+	    COL_GREEN="$(tput setaf 2)"
+	    COL_YELLOW="$(tput setaf 3)"
+	    COL_BLUE="$(tput setaf 4)"
+	    COL_GREY="$(tput setaf 6)"
+	    COL_LTGREY="$(tput setaf 7)"
+	    COL_DKGREY="$(tput setaf 8)"
+	    COL_WHITE="$(tput setaf 9)"
+	    COL_NORM="${COL_DKGREY}"
+	fi
+	;;
 esac
 
 typeset hn
 case ${HOSTNAME} in
-	PHX*) hn="";;
-	*) hn="@${HOSTNAME}";;
+    Walter*) hn="";;
+    *) hn="@${HOSTNAME}";;
 esac
 
 strata() {
-	if [[ -z ${hosttype} ]]; then
-		case ${HOSTNAME} in
-			PHX*) hosttype="Lo";;
-			*sv*) hosttype="VM";;
-			lppbd00b5) hosttype="He" ;;
-			lpdbd*) hosttype="Cu" ;;
-			lppbd*) hosttype="Ag" ;;
-			lgpbd0*) hosttype="Pt" ;;
-			lgpbd*) hosttype="Au" ;;
-		esac
-	fi
-	
-	hosttype=${hosttype:-Un}
-	print "${hosttype}"
+    if [[ -z ${hosttype} ]]; then
+	case ${HOSTNAME} in
+	    Walter*) hosttype="Lo";;
+	esac
+    fi
+    
+    hosttype=${hosttype:-Un}
+    print "${hosttype}"
 }
 
 typeset STRATA="$(strata)"
@@ -292,71 +270,69 @@ typeset BRANCH=""
 typeset GS=""
 
 is_gitrepo() {
-	dir=$(pwd)
-
-	while [[ ${dir} != "" ]]; do
-		[[ -d ${dir}/.git ]] && exit 0
-		dir=${dir%/*}
-	done
-
-	exit 1
+    dir=$(pwd)
+    
+    while [[ ${dir} != "" ]]; do
+	[[ -d ${dir}/.git ]] && exit 0
+	dir=${dir%/*}
+    done
+    
+    exit 1
 }
 
 typeset -a VCSINFO=( )
 
 cd() {
-	command cd "$@"
-	columns=$(tput cols)
-	PRD=${PWD/$HOME\//}
+    command cd "$@"
+    columns=$(tput cols)
+    PRD=${PWD/$HOME\//}
+    
+    if [[ -r ./.svn/all-wcprops ]]; then
+	VCSINFO=( $(sed -n 's/^\/svn\/repos\///g;s/\/\!/ /g;s/svn\/ver\///g;s/\([0-9]*\)\//\1:\//p' ./.svn/all-wcprops) )
 	
-	if [[ -r ./.svn/all-wcprops ]]; then
-		VCSINFO=( $(sed -n 's/^\/svn\/repos\///g;s/\/\!/ /g;s/svn\/ver\///g;s/\([0-9]*\)\//\1:\//p' ./.svn/all-wcprops) )
-
-		if (( ${#VCSINFO[@]} < 2 )); then
-			CURRDIR="$(printf "%sSVN%s %s%s" "${COL_BLUE}" "${COL_GREEN}" "$(basename ${PWD})" "${COL_NORM}")"
-		else
-			CURRDIR="$(printf "%s%s %sSVN v.%s%s" "${COL_BLUE}" ${VCSINFO[0]} "${COL_GREEN}" ${VCSINFO[1]} "${COL_NORM}")"
-		fi
-	elif $(is_gitrepo); then
-		VCSINFO=( $(git config remote.origin.url | sed -ne 's/.*:\(.*\)\/\(.*\).git$/\1 \2/p') )
-
-		if (( ${#VCSINFO[@]} < 2 )); then
-			CURRDIR="$(printf "%sGit %s%s%s" "${COL_BLUE}" "${COL_YELLOW}" "$(basename ${PWD})" "${COL_NORM}")"
-		else
-			BRANCH=$(git symbolic-ref HEAD) # $(git branch | sed -ne 's/* \(.*\)/\1/p')
-			BRANCH=${BRANCH:##*/}
-			GS="$(git status 2>&1)"
-			cwd="$(print ${PWD#$HOME/code} | tr -d "[:alnum:]_.-")$(basename ${PWD})"
-			if [[ "${GS}" =~ "unmerged paths" ]]; then
-				BRANCH+='|MERGING'
-				SLINE="${COL_YELLOW}"
-			elif [[ "${GS}" =~ "modified" ]]; then
-				SLINE="${COL_RED}"
-			else
-				SLINE="${COL_WHITE}"
-			fi
-			
-			if [[ ${VCSINFO[0]} =~ stash.aexp.com ]]; then VCSINFO[0]="Stash"; fi
-
-			CURRDIR="$(printf "%sGit %s %s%s:%s%s%s \"%s\"" "${COL_BLUE}" ${VCSINFO[0]} "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${cwd}" "${COL_NORM}" "${BRANCH}")"
-		fi
+	if (( ${#VCSINFO[@]} < 2 )); then
+	    CURRDIR="$(printf "%sSVN%s %s%s" "${COL_BLUE}" "${COL_GREEN}" "$(basename ${PWD})" "${COL_NORM}")"
 	else
-		VCSINFO=( 0 0 )
-		cwd=${PWD/$HOME/\~}
-		CURRDIR="${COL_GREEN}$(print ${cwd} | tr -d "[:alnum:]_.-")$(basename ${PWD})${COL_NORM}"
+	    CURRDIR="$(printf "%s%s %sSVN v.%s%s" "${COL_BLUE}" ${VCSINFO[0]} "${COL_GREEN}" ${VCSINFO[1]} "${COL_NORM}")"
 	fi
-
-#	if (( infocols + ${#VCSINFO[0]} + ${#VCSINFO[1]} > columns )); then
-	if (( infocols + ${#CURRDIR} > columns )); then
-		INFOLINE="${COL_BOLD}${STRATA}${COL_UNBOLD}"
+    elif $(is_gitrepo); then
+	VCSINFO=( $(git config remote.origin.url | sed -ne 's/.*:\(.*\)\/\(.*\).git$/\1 \2/p') )
+	
+	if (( ${#VCSINFO[@]} < 2 )); then
+	    CURRDIR="$(printf "%sGit %s%s%s" "${COL_BLUE}" "${COL_YELLOW}" "$(basename ${PWD})" "${COL_NORM}")"
 	else
-		INFOLINE="${WHOWHERE} ${COL_BOLD}${STRATA}${COL_UNBOLD}"
+	    BRANCH=$(git symbolic-ref HEAD) # $(git branch | sed -ne 's/* \(.*\)/\1/p')
+	    BRANCH=${BRANCH:##*/}
+	    GS="$(git status 2>&1)"
+	    cwd="$(print ${PWD#$HOME/code} | tr -d "[:alnum:]_.-")$(basename ${PWD})"
+
+	    if [[ "${GS}" =~ "unmerged paths" ]]; then
+		BRANCH+='|MERGING'
+		SLINE="${COL_YELLOW}"
+	    elif [[ "${GS}" =~ "modified" ]]; then
+		SLINE="${COL_RED}"
+	    else
+		SLINE="${COL_WHITE}"
+	    fi
+	    
+	    CURRDIR="$(printf "%sGit %s %s%s:%s%s%s \"%s\"" "${COL_BLUE}" ${VCSINFO[0]} "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${cwd}" "${COL_NORM}" "${BRANCH}")"
 	fi
+    else
+	VCSINFO=( 0 0 )
+	cwd=${PWD/$HOME/\~}
+	CURRDIR="${COL_GREEN}$(print ${cwd} | tr -d "[:alnum:]_.-")$(basename ${PWD})${COL_NORM}"
+    fi    
+
+    if (( infocols + ${#CURRDIR} > columns )); then
+	INFOLINE="${COL_BOLD}${STRATA}${COL_UNBOLD}"
+    else
+	INFOLINE="${WHOWHERE} ${COL_BOLD}${STRATA}${COL_UNBOLD}"
+    fi
 }
 
 getdirstat() {
-	cd .
-	print ${CURRDIR}
+    cd .
+    print ${CURRDIR}
 }
 
 PS1='${COL_NORM}[ ${INFOLINE} $(xdate) $(getdirstat) ]
