@@ -289,6 +289,7 @@ typeset WHOWHERE="$(whoami)${hn}"
 typeset INFOLINE="${SHELL}"
 typeset SLINE=""
 typeset BRANCH=""
+typeset GS=""
 
 is_gitrepo() {
 	dir=$(pwd)
@@ -324,9 +325,16 @@ cd() {
 		else
 			BRANCH=$(git symbolic-ref HEAD) # $(git branch | sed -ne 's/* \(.*\)/\1/p')
 			BRANCH=${BRANCH:##*/}
-			git status 2>&1 | grep -q modified:
-			if (( $? == 0 )); then SLINE="${COL_RED}"; else SLINE="${COL_WHITE}"; fi
-			cwd="$(print ${PWD#$HOME/code/Git/GitLab/} | tr -d "[:alnum:]_.-")$(basename ${PWD})"
+			GS="$(git status 2>&1)"
+			cwd="$(print ${PWD#$HOME/code} | tr -d "[:alnum:]_.-")$(basename ${PWD})"
+			if [[ "${GS}" =~ "unmerged paths" ]]; then
+				BRANCH+='|MERGING'
+				SLINE="${COL_YELLOW}"
+			elif [[ "${GS}" =~ "modified" ]]; then
+				SLINE="${COL_RED}"
+			else
+				SLINE="${COL_WHITE}"
+			fi
 			
 			if [[ ${VCSINFO[0]} =~ stash.aexp.com ]]; then VCSINFO[0]="Stash"; fi
 
@@ -356,3 +364,4 @@ ${COL_NORM}$ ${COL_WHITE}'
 
 [ -r ~/.localenv ] && . ~/.localenv
 [ -r /etc/environment ] && . /etc/environment
+
