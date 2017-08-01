@@ -67,6 +67,17 @@ function .sh.math.fac n
 	(( .sh.value = f ))
 }
 
+function wb
+{
+	typeset dir=${1:-.}
+
+	if [[ -d ${dir} ]]; then
+		( cd ${dir}; git branch -v )
+	else
+		print -u2 "wb error: no such directory ${dir}"
+	fi
+}
+
 function md5ign
 {
 	typeset md5ign_file md5ign_sign
