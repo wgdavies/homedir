@@ -37,6 +37,9 @@ else
 	print "WARNING: Operating System unknown"
 fi
 
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/tatti/bin/google-cloud-sdk/path.ksh.inc' ]; then source '/Users/tatti/bin/google-cloud-sdk/path.ksh.inc'; fi
+
 alias la='ls -a'
 alias lf='ls -F'
 alias ll='ls -l'
