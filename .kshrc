@@ -48,6 +48,8 @@ alias lm='/bin/ls'
 alias cdb='cd $OLDPWD'
 alias cdt='cd ${PWD%/trunk/*}/trunk'
 alias tl='jove ~/.tasks'
+alias pwe='openssl enc -aes-256-cbc -salt -in ~/.pw.txt -out ~/.pw.enc && rm ~/.pw.txt'
+alias pwc='openssl enc -aes-256-cbc -d -n ~/.pw.enc -out ~/.pw.txt'
 
 alias fgw='export COL_NORM=${COL_WHITE}'
 alias fgk='export COL_NORM=${COL_BLACK}'
