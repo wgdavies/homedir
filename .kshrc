@@ -50,7 +50,6 @@ alias cdt='cd ${PWD%/trunk/*}/trunk'
 alias tl='jove ~/.tasks'
 alias pwe='openssl enc -aes-256-cbc -salt -in ~/.pw.txt -out ~/.pw.enc && rm ~/.pw.txt'
 alias pwc='openssl enc -aes-256-cbc -d -in ~/.pw.enc -out ~/.pw.txt'
-alias rsafp='openssl rsa -in $1 -pubout -outform DER | openssl md5 -c'
 
 alias fgw='export COL_NORM=${COL_WHITE}'
 alias fgk='export COL_NORM=${COL_BLACK}'
@@ -71,6 +70,11 @@ function .sh.math.fac n
 	done
 
 	(( .sh.value = f ))
+}
+
+function rsafp
+{
+	openssl rsa -in ${1} -pubout -outform DER | openssl md5 -c
 }
 
 function wb
@@ -352,7 +356,12 @@ getdirstat() {
     print ${CURRDIR}
 }
 
-PS1='${COL_NORM}[ ${INFOLINE} $(xdate) $(getdirstat) ]
+termtitle() {
+	typeset termtitle_string=${1:-""}
+	printf "\033]0;${termtitle_string}\007"
+}
+
+PS1='$(termtitle $(tty))${COL_NORM}[ ${INFOLINE} $(xdate) $(getdirstat) ]
 ${COL_NORM}$ ${COL_WHITE}'
 
 [ -r ~/.localenv ] && . ~/.localenv
