@@ -73,11 +73,6 @@ function .sh.math.fac n
 	(( .sh.value = f ))
 }
 
-function rsafp
-{
-	openssl rsa -in ${1} -pubout -outform DER | openssl md5 -c
-}
-
 function wb
 {
 	typeset dir=${1:-.}
