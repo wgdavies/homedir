@@ -16,6 +16,7 @@ export LANG="en_GB.UTF-8"
 export OS=$(uname -s)
 export HOSTNAME=$(hostname -s)
 export PRD=${PWD/$HOME\//}
+export TERM_TITLE=$(basename $(tty))
 
 # Conditional PATH updates
 #
@@ -357,11 +358,10 @@ getdirstat() {
 }
 
 termtitle() {
-	typeset termtitle_string=${1:-""}
-	printf "\033]0;${termtitle_string}\007"
+	printf "\033]0;${TERM_TITLE}\007"
 }
 
-PS1='$(termtitle $(tty))${COL_NORM}[ ${INFOLINE} $(xdate) $(getdirstat) ]
+PS1='$(termtitle)${COL_NORM}[ ${INFOLINE} $(xdate) $(getdirstat) ]
 ${COL_NORM}$ ${COL_WHITE}'
 
 [ -r ~/.localenv ] && . ~/.localenv
