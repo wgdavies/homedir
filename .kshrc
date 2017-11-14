@@ -26,9 +26,11 @@ export TERM_TITLE=$(basename $(tty))
 #
 if [[ ${OS} == FreeBSD ]];then
 	typeset MD5=$(which md5)
+	alias md5sum='md5 -r'
 	alias ls='ls -G -D "%Y-%m-%d %H:%M"'
 elif [[ ${OS} == Darwin ]]; then
 	typeset MD5=$(which md5)
+	alias md5sum='md5 -r'
 	alias ls='ls -G'
 elif [[ ${OS} =~ Linux ]]; then
 	typeset MD5=$(which md5sum)
