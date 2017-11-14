@@ -1,0 +1,78 @@
+#!/bin/ksh
+#
+# onep - command line 1Pass[word] manager
+
+# TODOs:
+# -h help
+# -s change number of seconds until pb wiped out
+# -u also show user name/ID assigned to account
+# -a add new entry
+# -m modify entry
+# -d delete entry
+# -l list entries
+
+PATH=/bin:/usr/bin
+
+# alias pwe='openssl enc -aes-256-cbc -salt -in ~/.pw.txt -out ~/.pw.enc && rm ~/.pw.txt'
+# alias pwc='openssl enc -aes-256-cbc -d -in ~/.pw.enc -out ~/.pw.txt'
+
+if [[ -z ${1} ]] || [[ ${1} == help ]]; then
+	print -u2 "usage: onep <account identifier> | command"
+	print -u2 "\twhere 'command' is one of:"
+	print -u2 "\tlist\t - list out the known accounts by short name"
+	print -u2 "\tdesc\t - describe the short name account"
+	print -u2 "\tedit\t - manually edit the list; re-encrypts upon completion"
+	print -u2 "\tdump\t - dump the full database (insecure!)"
+elif [[ ${1} == list ]]; then
+	openssl enc -aes-256-cbc -d -in ~/.pw.enc | awk -F'\t' '{print $1}'
+elif [[ ${1} == edit ]]; then
+	typeset tmpfile=$(mktemp)
+	
+	if (( $? != 0 )) || [[ -z ${tmpfile} ]]; then
+		print -u2 "error creating tmpfile ${tmpfile}"
+		exit 1
+	else
+		openssl enc -aes-256-cbc -d -in ~/.pw.enc -out ${tmpfile}
+		nano -I -L -N -R ${tmpfile}
+		openssl enc -aes-256-cbc -salt -in ${tmpfile} -out ~/.pw.enc
+		
+		if (( $? != 0 )); then
+			print -u2 "error, unable to write new encrypted password database"
+			print -u2 "see ${tmpfile} for more information"
+		else
+			rm -f ${tmpfile}
+			print "new encypted password database successfully written"
+		fi
+	fi
+elif [[ ${1} == desc ]]; then
+	if (( ${#2} > 0 )); then
+		openssl enc -aes-256-cbc -d -in ~/.pw.enc | grep ${2} | awk -F'\t' '{print $2}'
+	else
+		openssl enc -aes-256-cbc -d -in ~/.pw.enc | awk -F'\t' '{printf ("%16s %s\n", $1, $2)}'
+	fi
+elif [[ ${1} == user ]]; then
+	if (( ${#2} > 0 )); then
+		openssl enc -aes-256-cbc -d -in ~/.pw.enc | grep ${2} | awk -F'\t' '{print $3}'
+	else
+		print -u2 "error, must specify account short name to display user"
+	fi
+elif [[ ${1} == dump ]]; then
+	openssl enc -aes-256-cbc -d -in ~/.pw.enc 
+else
+	openssl enc -aes-256-cbc -d -in ~/.pw.enc | grep ${1} | awk -F'\t' '{print $4}' | pbcopy
+	typeset tmppass=$(pbpaste)
+	
+	if (( ${#tmppass} > 0 )); then
+		if [[ ${tmppass} == NP ]]; then
+			unset tmppass
+			print "No password copied; please run '${0} desc ${1}' for further login information."
+		else
+			unset tmppass
+			print "Password for '${1}' temporarily copied to pasteboard."
+			( sleep 10 && printf '' | pbcopy ) &
+		fi
+	else
+		print -u2 "onep warning: no password set for ${1} or short name does not exist"
+	fi
+fi
+
