@@ -1,0 +1,30 @@
+[user]
+	name = Walter G Davies
+	email = walter.g.davies@gmail.com
+[core]
+	excludesfile = /Users/tatti/.gitignore_global
+	editor = nano
+[alias]
+	co = checkout
+	br = branch
+	ci = commit
+	st = status
+	stat = status
+	unstage = reset HEAD --
+	last = log -1 HEAD
+	log = log --graph --pretty=format:'%Cred%h%Creset %C(yellow)%an%d%Creset %s %Cgreen(%cr)%Creset' --date=relative
+	poll = "!git pull origin \"$(git rev-parse --abbrev-ref HEAD)\""
+[transfer]
+	fsckObjects = true
+[push]
+	default = current
+[filter "lfs"]
+	clean = git-lfs clean %f
+	smudge = git-lfs smudge %f
+	required = true
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path = 
+[mergetool "sourcetree"]
+	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
