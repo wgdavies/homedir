@@ -13,6 +13,7 @@ fi
 
 export LC_ALL="C"
 export LANG="en_GB.UTF-8"
+export SHELL="/bin/ksh"
 export OS=$(uname -s)
 export HOSTNAME=$(hostname -s)
 export PRD=${PWD/$HOME\//}
@@ -73,6 +74,54 @@ function .sh.math.fac n
 	done
 
 	(( .sh.value = f ))
+}
+
+function awsput
+{
+	typeset _aws_key=${1}
+	typeset _aws_app=${2}
+	typeset _aws_des=${3}
+	
+	if [[ -z ${_aws_key} ]] || [[ ${_aws_key} == *(-)h*(elp) ]] \
+	   || [[ -z ${_aws_app} ]] || [[ -z ${_aws_des} ]]; then
+		print -u2 "usage: awsput <key> <app> <des>"
+		print -u2 "       where"
+		print -u2 "       <key> is application.zip ID (to be created by aws command)"
+		print -u2 "       <app> is CD ApplicationName (from Console)"
+		print -u2 "       <des> is application_Version_String (matches directory name_version)"
+	else
+		aws deploy push --application-name ${_aws_app} --s3-location s3://cashnet-codedeploy/${_aws_key} --source ./${_aws_des} --description ${_aws_des}
+	fi
+}
+
+function awsget
+{
+	typeset _aws_key=${1}
+	typeset _aws_ver=${2}
+	
+	if [[ -z ${_aws_key} ]] || [[ ${_aws_key} == *(-)h*(elp) ]] \
+	   || [[ -z ${_aws_ver} ]]; then
+		print -u2 "usage: awsget <key> <ver>"
+		print -u2 "       where"
+		print -u2 "       <key> is application.zip ID"
+		print -u2 "       <ver> is S3 versionId string"
+	else
+		aws s3api get-object --bucket cashnet-codedeploy --key ${_aws_key} --version-id ${_aws_ver} ./${_aws_key}
+	fi
+}
+
+function awslist
+{
+	typeset -a _aws_list=( $@ )
+	typeset -i _aws_idx=0
+	
+	if (( ${#_aws_list[@]} == 0 )) || [[ ${_aws_list[*]} =~ help ]]; then
+		print -u2 "usage: awslist <ApplicationName> <...>"
+	else
+		for (( _aws_idx = 0 ; _aws_idx < ${#_aws_list[@]} ; ++_aws_idx )); do
+			aws deploy list-application-revisions --application-name ${_aws_list[$_aws_idx]} --sort-by registerTime --sort-order descending --max-items 1
+		done
+	fi
 }
 
 function wb
