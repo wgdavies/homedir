@@ -33,6 +33,7 @@ elif [[ ${OS} == Darwin ]]; then
 	typeset MD5=$(which md5)
 	alias md5sum='md5 -r'
 	alias ls='ls -G'
+	alias eject='diskutil eject'
 elif [[ ${OS} =~ Linux ]]; then
 	typeset MD5=$(which md5sum)
 	alias ls='ls --color'
