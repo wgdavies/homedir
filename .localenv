@@ -5,11 +5,12 @@
 [ -d /opt/go ] && export GOROOT=/opt/go && PATH=${PATH}:${GOROOT}/bin
 [ -d /opt/node ] && export NODE=/opt/node && PATH=${PATH}:${NODE}/bin
 [ -d ~/bin ] && PATH=${PATH}:~/bin
+[ -f ~/.localhosts ] && source ~/.localhosts
 
 export SVN_EDITOR=jove
 
 #typeset -i snum=$(tty | sed 's;.*/;;')
-typeset -i snum=$(w | egrep '^wdavie' | wc -l)
+typeset -i snum=$(w | egrep -c "^$(whoami)")
 
 if [[ ! $(typeset -r) =~ HIST ]]; then
 	export HISTSIZE=32767
