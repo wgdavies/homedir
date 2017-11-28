@@ -411,6 +411,6 @@ termtitle() {
 PS1='$(termtitle)${COL_NORM}[ ${INFOLINE} $(xdate) $(getdirstat) ]
 ${COL_NORM}$ ${COL_WHITE}'
 
-[ -r ~/.localenv ] && . ~/.localenv
 [ -r /etc/environment ] && . /etc/environment
+[ -r ~/.localenv ] && . ~/.localenv
 
