@@ -59,7 +59,7 @@ elif [[ ${1} == user ]]; then
 elif [[ ${1} == dump ]]; then
 	openssl enc -aes-256-cbc -d -in ~/.pw.enc 
 else
-	openssl enc -aes-256-cbc -d -in ~/.pw.enc | grep ${1} | awk -F'\t' '{print $4}' | pbcopy
+	openssl enc -aes-256-cbc -d -in ~/.pw.enc | grep ${1} | awk -F'\t' '{printf "%s", $4}' | pbcopy
 	typeset tmppass=$(pbpaste)
 	
 	if (( ${#tmppass} > 0 )); then
