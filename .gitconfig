@@ -2,7 +2,7 @@
 	name = Walter G Davies
 	email = walter.g.davies@gmail.com
 [core]
-	excludesfile = /Users/tatti/.gitignore_global
+	excludesfile = ~/.gitignore_global
 	editor = nano
 [alias]
 	co = checkout
