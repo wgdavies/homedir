@@ -352,7 +352,21 @@ is_gitrepo() {
 typeset -a VCSINFO=( )
 
 cd() {
-    command cd "$@"
+    typeset -a _cd_dir=( $@ )
+    typeset _cd_cwd
+
+    if (( ${#_cd_dir[@]} == 2 )) && [[ ${_cd_dir[0]} == -d ]]; then
+	if [[ -d ${_cd_dir[1]} ]]; then
+	    print -u2 "directory ${_cd_dir[1]} exists"
+	else
+	    mkdir ${_cd_dir[1]}
+	    print -u2 "created directory ${_cd_dir[1]}"
+	fi
+
+	_cd_dir=${_cd_dir[1]}
+    fi
+    
+    command cd ${_cd_dir[*]}
     columns=$(tput cols)
     PRD=${PWD/$HOME\//}
     
@@ -371,9 +385,9 @@ cd() {
 	    CURRDIR="$(printf "%sGit %s%s%s" "${COL_BLUE}" "${COL_YELLOW}" "$(basename ${PWD})" "${COL_NORM}")"
 	else
 	    BRANCH=$(git symbolic-ref HEAD) # $(git branch | sed -ne 's/* \(.*\)/\1/p')
-	    BRANCH=${BRANCH:##*/}
+            BRANCH=${BRANCH:##*/}
 	    GS="$(git status 2>&1)"
-	    cwd="$(print ${PWD#$HOME/code} | tr -d "[:alnum:]_.-")$(basename ${PWD})"
+	    _cd_cwd="$(print ${PWD#$HOME/code} | tr -d "[:alnum:]_.-")$(basename ${PWD})"
 
 	    if [[ "${GS}" =~ "unmerged paths" ]]; then
 		BRANCH+='|MERGING'
@@ -384,12 +398,12 @@ cd() {
 		SLINE="${COL_WHITE}"
 	    fi
 	    
-	    CURRDIR="$(printf "%sGit %s %s%s:%s%s%s \"%s\"" "${COL_BLUE}" ${VCSINFO[0]} "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${cwd}" "${COL_NORM}" "${BRANCH}")"
+	    CURRDIR="$(printf "%sGit %s %s%s:%s%s%s \"%s\"" "${COL_BLUE}" ${VCSINFO[0]} "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${_cd_cwd}" "${COL_NORM}" "${BRANCH}")"
 	fi
     else
 	VCSINFO=( 0 0 )
-	cwd=${PWD/$HOME/\~}
-	CURRDIR="${COL_GREEN}$(print ${cwd} | tr -d "[:alnum:]_.-")$(basename ${PWD})${COL_NORM}"
+	_cd_cwd=${PWD/$HOME/\~}
+	CURRDIR="${COL_GREEN}$(print ${_cd_cwd} | tr -d "[:alnum:]_.-")$(basename ${PWD})${COL_NORM}"
     fi    
 
     if (( infocols + ${#CURRDIR} > columns )); then
