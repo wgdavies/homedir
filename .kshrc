@@ -363,7 +363,7 @@ cd() {
 	    print -u2 "created directory ${_cd_dir[1]}"
 	fi
 
-	_cd_dir=${_cd_dir[1]}
+	_cd_dir=( ${_cd_dir[1]} )
     fi
     
     command cd ${_cd_dir[*]}
