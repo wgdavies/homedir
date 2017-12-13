@@ -352,21 +352,21 @@ is_gitrepo() {
 typeset -a VCSINFO=( )
 
 cd() {
-    typeset -a _cd_dir=( $@ )
     typeset _cd_cwd
 
-    if (( ${#_cd_dir[@]} == 2 )) && [[ ${_cd_dir[0]} == -d ]]; then
-	if [[ -d ${_cd_dir[1]} ]]; then
-	    print -u2 "directory ${_cd_dir[1]} exists"
+    if [[ ${1} == -d ]]; then
+	if [[ -d ${2} ]]; then
+	    print -u2 "directory ${2} exists"
 	else
-	    mkdir ${_cd_dir[1]}
-	    print -u2 "created directory ${_cd_dir[1]}"
+	    mkdir "${2}"
+	    print -u2 "created directory ${2}"
 	fi
-
-	_cd_dir=( ${_cd_dir[1]} )
+	
+	command cd "${2}"
+    else
+	command cd "${@}"
     fi
-    
-    command cd ${_cd_dir[*]}
+
     columns=$(tput cols)
     PRD=${PWD/$HOME\//}
     
