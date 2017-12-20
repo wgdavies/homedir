@@ -33,7 +33,7 @@ elif [[ ${1} == edit ]]; then
 		exit 1
 	else
 		openssl enc -aes-256-cbc -d -in ~/.pw.enc -out ${tmpfile}
-		nano -I -L -N -R ${tmpfile}
+		nano -I -L -N -R -m -t ${tmpfile}
 		openssl enc -aes-256-cbc -salt -in ${tmpfile} -out ~/.pw.enc
 		
 		if (( $? != 0 )); then
@@ -60,6 +60,7 @@ elif [[ ${1} == dump ]]; then
 	openssl enc -aes-256-cbc -d -in ~/.pw.enc 
 else
 	openssl enc -aes-256-cbc -d -in ~/.pw.enc | grep ${1} | awk -F'\t' '{printf "%s", $4}' | pbcopy
+#	openssl enc -aes-256-cbc -d -in ~/.pw.enc | grep ${1} | awk -F'\t' '{print $4}' | pbcopy
 	typeset tmppass=$(pbpaste)
 	
 	if (( ${#tmppass} > 0 )); then
