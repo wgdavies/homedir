@@ -391,14 +391,14 @@ cd() {
 
 	    if [[ "${GS}" =~ "unmerged paths" ]]; then
 		BRANCH+='|MERGING'
-		SLINE="${COL_YELLOW}"
+		SLINE="${COL_GREEN}${_cd_cwd}${COL_NORM}"
 	    elif [[ "${GS}" =~ "modified" ]]; then
-		SLINE="${COL_RED}"
+		SLINE="${COL_RED}${COL_BOLD}${_cd_cwd}${COL_UNBOLD}${COL_NORM}"
 	    else
-		SLINE="${COL_WHITE}"
+		SLINE="${COL_WHITE}${_cd_cwd}${COL_NORM}"
 	    fi
 	    
-	    CURRDIR="$(printf "%sGit %s %s%s:%s%s%s \"%s\"" "${COL_BLUE}" ${VCSINFO[0]} "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${_cd_cwd}" "${COL_NORM}" "${BRANCH}")"
+	    CURRDIR="$(printf "%sGit %s %s%s:%s \"%s\"" "${COL_BLUE}" ${VCSINFO[0]} "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${BRANCH}")"
 	fi
     else
 	VCSINFO=( 0 0 )
