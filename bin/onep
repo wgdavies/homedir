@@ -33,7 +33,7 @@ elif [[ ${1} == edit ]]; then
 		exit 1
 	else
 		openssl enc -aes-256-cbc -d -in ~/.pw.enc -out ${tmpfile}
-		nano -I -L -N -R -m -t ${tmpfile}
+		nano -I -L -N -R -m -w -t ${tmpfile}
 		openssl enc -aes-256-cbc -salt -in ${tmpfile} -out ~/.pw.enc
 		
 		if (( $? != 0 )); then
