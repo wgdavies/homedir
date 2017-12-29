@@ -1,8 +1,15 @@
+;; Add top-level Emacs modules here
 (add-to-list 'load-path "~/.elisp")
+
+;; Pretty-print time in modeline
 (autoload 'buffer-time-stamp "buffer-timestamp-mode"
    "Show buffer timestamps in modeline" t)
+
+;; Set shell-mode editing properly
 (add-to-list 'interpreter-mode-alist
 	     '("ksh93" . shell-script-mode))
+
+;; Hooks and info for Goland
 (add-to-list 'load-path "/opt/go/misc/emacs/" t)
 (require 'go-mode-load)
 (add-hook 'go-mode-hook
@@ -12,15 +19,22 @@
     (setq standard-indent 4)
     (setq indent-tabs-mode nil)))
 
+;; Hooks and info for C
 (setq c-default-style "bsd"
 	c-basic-offset 4)
 
+;; Documentation module
 (require 'doxymacs)
 (add-hook 'c-mode-common-hook'doxymacs-mode)
 
+;; Markdown support
 (require 'markdown-mode)
 (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
 
+;; Compile all the .elc files which have a corresponding newer .el file 
+(byte-recompile-directory "~/.elisp")
+
+;; Global customisations follow
 (global-set-key (kbd "C-x <left>")  'windmove-left)
 (global-set-key (kbd "C-x <right>") 'windmove-right)
 (global-set-key (kbd "C-x <up>")    'windmove-up)
