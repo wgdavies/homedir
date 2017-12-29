@@ -1,9 +1,9 @@
 (add-to-list 'load-path "~/.elisp")
 (autoload 'buffer-time-stamp "buffer-timestamp-mode"
    "Show buffer timestamps in modeline" t)
-(add-to-list 'load-path "/opt/go/misc/emacs/" t)
 (add-to-list 'interpreter-mode-alist
 	     '("ksh93" . shell-script-mode))
+(add-to-list 'load-path "/opt/go/misc/emacs/" t)
 (require 'go-mode-load)
 (add-hook 'go-mode-hook
   (lambda ()
