@@ -1,0 +1,34 @@
+#!/bin/ksh
+#
+# ipv426 - convert IPv4 address with hostname to IPv6 suitable for import to e.g /etc/hosts
+#
+# TODO:
+# * getopts:
+
+typeset hdn
+typeset ipv4
+typeset ipv6
+typeset -a ipa
+typeset -i oct
+
+hdn=${1}
+ipv4=${2}
+ipa=( ${ipv4//./ } )
+
+function usage {
+    print "ipv426 <FQDN> <IPv4.address>"
+}
+
+if (( ${#ipa[@]} != 4 )); then
+    usage
+else
+    for oct in ${ipa[@]}; do
+	if ! (( 256 >= oct )) && (( oct >= 0 )); then
+	    print -u2 "error: invalid IP address ${ipv4}"
+	    usage
+	    break
+	fi
+    done
+
+    printf "fe80:0:0:0:0:0:%02x%02x:%02x%02x\t%s\n" ${ipa[@]} ${hdn}
+fi
