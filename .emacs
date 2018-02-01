@@ -9,9 +9,10 @@
 (add-to-list 'interpreter-mode-alist
 	     '("ksh93" . shell-script-mode))
 
-;; Hooks and info for Goland
-(add-to-list 'load-path "/opt/go/misc/emacs/" t)
-(require 'go-mode-load)
+;; Hooks and info for Golang
+;; (add-to-list 'load-path "/opt/go/misc/emacs/" t)
+;; (require 'go-mode-load)
+(require 'go-mode)
 (add-hook 'go-mode-hook
   (lambda ()
     (setq-default)

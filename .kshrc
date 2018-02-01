@@ -323,7 +323,7 @@ esac
 strata() {
     if [[ -z ${hosttype} ]]; then
 	case ${HOSTNAME} in
-	    Walter*|bloch) hosttype="Lo";;
+	    Walter*|bloch|macnoobl*) hosttype="Lo";;
 	esac
     fi
     
