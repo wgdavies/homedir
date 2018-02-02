@@ -8,7 +8,7 @@ set -o trackall
 # Source global definitions
 #
 if [ -f /etc/kshrc ]; then
-	. /etc/kshrc
+    . /etc/kshrc
 fi
 
 export LC_ALL="C"
@@ -26,20 +26,20 @@ export TERM_TITLE=$(basename $(tty))
 # User specific aliases and functions
 #
 if [[ ${OS} == FreeBSD ]];then
-	typeset MD5=$(which md5)
-	alias md5sum='md5 -r'
-	alias ls='ls -G -D "%Y-%m-%d %H:%M"'
+    typeset MD5=$(which md5)
+    alias md5sum='md5 -r'
+    alias ls='ls -G -D "%Y-%m-%d %H:%M"'
 elif [[ ${OS} == Darwin ]]; then
-	typeset MD5=$(which md5)
-	alias md5sum='md5 -r'
-	alias ls='ls -G'
-	alias eject='diskutil eject'
+    typeset MD5=$(which md5)
+    alias md5sum='md5 -r'
+    alias ls='ls -G'
+    alias eject='diskutil eject'
 elif [[ ${OS} =~ Linux ]]; then
-	typeset MD5=$(which md5sum)
-	alias ls='ls --color'
-	export TIME_STYLE=long-iso
+    typeset MD5=$(which md5sum)
+    alias ls='ls --color'
+    export TIME_STYLE=long-iso
 else
-	print "WARNING: Operating System unknown"
+    print "WARNING: Operating System unknown"
 fi
 
 # The next line updates PATH for the Google Cloud SDK.
@@ -68,103 +68,103 @@ alias line='grep -n --colour'
 #
 function .sh.math.fac n
 {
-	typeset -li f=1 i
+    typeset -li f=1 i
 
-	for (( i = 2 ; i <= n ; ++i )); do
-		(( f *= i ))
-	done
+    for (( i = 2 ; i <= n ; ++i )); do
+	(( f *= i ))
+    done
 
-	(( .sh.value = f ))
+    (( .sh.value = f ))
 }
 
 function awsput
 {
-	typeset _aws_key=${1}
-	typeset _aws_app=${2}
-	typeset _aws_des=${3}
-	
-	if [[ -z ${_aws_key} ]] || [[ ${_aws_key} == *(-)h*(elp) ]] \
+    typeset _aws_key=${1}
+    typeset _aws_app=${2}
+    typeset _aws_des=${3}
+    
+    if [[ -z ${_aws_key} ]] || [[ ${_aws_key} == *(-)h*(elp) ]] \
 	   || [[ -z ${_aws_app} ]] || [[ -z ${_aws_des} ]]; then
-		print -u2 "usage: awsput <key> <app> <des>"
-		print -u2 "       where"
-		print -u2 "       <key> is application.zip ID (to be created by aws command)"
-		print -u2 "       <app> is CD ApplicationName (from Console)"
-		print -u2 "       <des> is application_Version_String (matches directory name_version)"
-	else
-		aws deploy push --application-name ${_aws_app} --s3-location s3://cashnet-codedeploy/${_aws_key} --source ./${_aws_des} --description ${_aws_des}
-	fi
+	print -u2 "usage: awsput <key> <app> <des>"
+	print -u2 "       where"
+	print -u2 "       <key> is application.zip ID (to be created by aws command)"
+	print -u2 "       <app> is CD ApplicationName (from Console)"
+	print -u2 "       <des> is application_Version_String (matches directory name_version)"
+    else
+	aws deploy push --application-name ${_aws_app} --s3-location s3://cashnet-codedeploy/${_aws_key} --source ./${_aws_des} --description ${_aws_des}
+    fi
 }
 
 function awsget
 {
-	typeset _aws_key=${1}
-	typeset _aws_ver=${2}
-	
-	if [[ -z ${_aws_key} ]] || [[ ${_aws_key} == *(-)h*(elp) ]] \
+    typeset _aws_key=${1}
+    typeset _aws_ver=${2}
+    
+    if [[ -z ${_aws_key} ]] || [[ ${_aws_key} == *(-)h*(elp) ]] \
 	   || [[ -z ${_aws_ver} ]]; then
-		print -u2 "usage: awsget <key> <ver>"
-		print -u2 "       where"
-		print -u2 "       <key> is application.zip ID"
-		print -u2 "       <ver> is S3 versionId string"
-	else
-		aws s3api get-object --bucket cashnet-codedeploy --key ${_aws_key} --version-id ${_aws_ver} ./${_aws_key}
-	fi
+	print -u2 "usage: awsget <key> <ver>"
+	print -u2 "       where"
+	print -u2 "       <key> is application.zip ID"
+	print -u2 "       <ver> is S3 versionId string"
+    else
+	aws s3api get-object --bucket cashnet-codedeploy --key ${_aws_key} --version-id ${_aws_ver} ./${_aws_key}
+    fi
 }
 
 function awslist
 {
-	typeset -a _aws_list=( $@ )
-	typeset -i _aws_idx=0
-	
-	if (( ${#_aws_list[@]} == 0 )) || [[ ${_aws_list[*]} =~ help ]]; then
-		print -u2 "usage: awslist <ApplicationName> <...>"
-	else
-		for (( _aws_idx = 0 ; _aws_idx < ${#_aws_list[@]} ; ++_aws_idx )); do
-			aws deploy list-application-revisions --application-name ${_aws_list[$_aws_idx]} --sort-by registerTime --sort-order descending --max-items 1
-		done
-	fi
+    typeset -a _aws_list=( $@ )
+    typeset -i _aws_idx=0
+    
+    if (( ${#_aws_list[@]} == 0 )) || [[ ${_aws_list[*]} =~ help ]]; then
+	print -u2 "usage: awslist <ApplicationName> <...>"
+    else
+	for (( _aws_idx = 0 ; _aws_idx < ${#_aws_list[@]} ; ++_aws_idx )); do
+	    aws deploy list-application-revisions --application-name ${_aws_list[$_aws_idx]} --sort-by registerTime --sort-order descending --max-items 1
+	done
+    fi
 }
 
 function wb
 {
-	typeset dir=${1:-.}
+    typeset dir=${1:-.}
 
-	if [[ -d ${dir} ]]; then
-		( cd ${dir}; git branch -v )
-	else
-		print -u2 "wb error: no such directory ${dir}"
-	fi
+    if [[ -d ${dir} ]]; then
+	( cd ${dir}; git branch -v )
+    else
+	print -u2 "wb error: no such directory ${dir}"
+    fi
 }
 
 function md5ign
 {
-	typeset md5ign_file md5ign_sign
-	
-	for md5ign_file in ${@}; do
-		md5ign_sign=$(egrep -v '#.*' ${md5ign_file} | LC_ALL=C sort -bdf | tr -d '[:space:]' | ${MD5})
-		printf "%s %s\n" "${md5ign_sign}" "${md5ign_file}"
-	done
+    typeset md5ign_file md5ign_sign
+    
+    for md5ign_file in ${@}; do
+	md5ign_sign=$(egrep -v '#.*' ${md5ign_file} | LC_ALL=C sort -bdf | tr -d '[:space:]' | ${MD5})
+	printf "%s %s\n" "${md5ign_sign}" "${md5ign_file}"
+    done
 }
 
 function md5dir
 {
-	typeset dirname
-	typeset -i rcsv
-	
-	case ${1} in
-		-r) (( rcsv = 1 )); dirname=${2:-.} ;;
-		*) dirname=${1} ;;
-	esac
+    typeset dirname
+    typeset -i rcsv
+    
+    case ${1} in
+	-r) (( rcsv = 1 )); dirname=${2:-.} ;;
+	*) dirname=${1} ;;
+    esac
 
-	if (( rcsv == 1 )); then
-		find ${dirname} -type f -exec ${MD5} {} \;
+    if (( rcsv == 1 )); then
+	find ${dirname} -type f -exec ${MD5} {} \;
+    else
+	if [[ -d ${dirname} ]]; then
+	    tar -cf - ${dirname} | ${MD5}
 	else
-		if [[ -d ${dirname} ]]; then
-			tar -cf - ${dirname} | ${MD5}
-		else
-			print -u2 "md5dir error: ${dirname} does not exist or is not a directory"
-		fi
+	    print -u2 "md5dir error: ${dirname} does not exist or is not a directory"
 	fi
+    fi
 }
 
 function man2pdf
@@ -183,99 +183,99 @@ function man2pdf
 
 function enumerate
 {
-	typeset -i linenum
-	typeset line
-	typeset readfile
+    typeset -i linenum
+    typeset line
+    typeset readfile
 
-	for readfile in $@; do
-		printf "::::::::\nEnumerating %s\n::::::::\n" ${readfile}
-		linenum=0
-		OLDIFS="$IFS"
-		IFS='\'
+    for readfile in $@; do
+	printf "::::::::\nEnumerating %s\n::::::::\n" ${readfile}
+	linenum=0
+	OLDIFS="$IFS"
+	IFS='\'
 
-		while read -r line; do
-			(( linenum++ ))
-			printf "%4d: %s\n" ${linenum} "$line"
-		done < ${readfile} | less
-		
-		IFS="$OLDIFS"
-	done
+	while read -r line; do
+	    (( linenum++ ))
+	    printf "%4d: %s\n" ${linenum} "$line"
+	done < ${readfile} | less
+	
+	IFS="$OLDIFS"
+    done
 }
 
 function where {
-	typeset string=$1
-	typeset -a lines
+    typeset string=$1
+    typeset -a lines
 
-	if [[ -z $2 ]]; then
-		print "usage: where <string> <file(s)>"
-	else
-		printf "Searching for occurrences of %s...\n" ${string}
-		for filename in ${@:2}; do
-			if [[ -r ${filename} ]]; then
-				lines=( $(grep -n ${string} ${filename} | cut -d: -f1) )
-				
-				printf "%s: %d lines; %s\n" ${filename} $(wc -l < ${filename}) "${lines[*]}"
-			else
-				printf "error: unable to read file: %s\n" ${filename}
-			fi
-		done
-	fi
+    if [[ -z $2 ]]; then
+	print "usage: where <string> <file(s)>"
+    else
+	printf "Searching for occurrences of %s...\n" ${string}
+	for filename in ${@:2}; do
+	    if [[ -r ${filename} ]]; then
+		lines=( $(grep -n ${string} ${filename} | cut -d: -f1) )
+		
+		printf "%s: %d lines; %s\n" ${filename} $(wc -l < ${filename}) "${lines[*]}"
+	    else
+		printf "error: unable to read file: %s\n" ${filename}
+	    fi
+	done
+    fi
 }
 
 function xdate {
-	typeset datestamp datestring datearg;
+    typeset datestamp datestring datearg;
 
-	if (( ${#} > 0 )); then
-		for datearg in ${@}; do
-			if [[ ${datearg} =~ [0-9,a-f,A-F] ]]; then
-				if [[ ${datearg} =~ 0x ]]; then
-					datestamp=$(printf "%d" ${datearg})
-				else
-					datestamp=$(printf "%d" 0x${datearg})
-				fi
-				datestring=$(printf '%(%FT%T)T' '#'${datestamp})
-			else
-				datestring=$(printf "%X" ${1})
-			fi
-		done
-	else
-		datestring=$(printf "%X" $(printf '%(%s)T' now))
-	fi
+    if (( ${#} > 0 )); then
+	for datearg in ${@}; do
+	    if [[ ${datearg} =~ [0-9,a-f,A-F] ]]; then
+		if [[ ${datearg} =~ 0x ]]; then
+		    datestamp=$(printf "%d" ${datearg})
+		else
+		    datestamp=$(printf "%d" 0x${datearg})
+		fi
+		datestring=$(printf '%(%FT%T)T' '#'${datestamp})
+	    else
+		datestring=$(printf "%X" ${1})
+	    fi
+	done
+    else
+	datestring=$(printf "%X" $(printf '%(%s)T' now))
+    fi
 
-	print ${datestring}
+    print ${datestring}
 }
 
 function oldxdate {
-	typeset datestamp datestring datearg;
+    typeset datestamp datestring datearg;
 
-	if (( $# > 0 )); then
-		for datearg in $@; do
-			if [[ ${datearg} =~ [0-9,a-f,A-F] ]]; then
-				if [[ ${datearg} =~ 0x ]]; then
-					datestamp=$(printf "%d" ${datearg})
-				else
-					datestamp=$(printf "%d" 0x${datearg})
-				fi
-				datestring=$(print ${datestamp} | sed -e 's/\(....\)\(..\)\(..\)\(..\)\(..\)\(..\)/\1-\2-\3T\4:\5:\6/g')
-			else
-				datestring=$(printf "%X" $1)
-			fi
-		done
-	else
-		datestring=$(printf "%X" $(date +"%Y%m%d%H%M%S"))
-	fi
+    if (( $# > 0 )); then
+	for datearg in $@; do
+	    if [[ ${datearg} =~ [0-9,a-f,A-F] ]]; then
+		if [[ ${datearg} =~ 0x ]]; then
+		    datestamp=$(printf "%d" ${datearg})
+		else
+		    datestamp=$(printf "%d" 0x${datearg})
+		fi
+		datestring=$(print ${datestamp} | sed -e 's/\(....\)\(..\)\(..\)\(..\)\(..\)\(..\)/\1-\2-\3T\4:\5:\6/g')
+	    else
+		datestring=$(printf "%X" $1)
+	    fi
+	done
+    else
+	datestring=$(printf "%X" $(date +"%Y%m%d%H%M%S"))
+    fi
 
-	print ${datestring}
+    print ${datestring}
 }
 
 function whatkey {
-	xev | \
+    xev | \
 	grep -A2 --line-buffered '^KeyRelease' | \
 	sed -n '/keycode /s/^.*keycode \([0-9]*\).* (.*, \(.*\)).*$/\1 \2/p'
 }
 
 function git_id {
-	printf 'blob %s\0' "$(ls -l "$1" | awk '{print $5;}')" | cat - "$1" | sha1sum | awk '{print $1}'
+    printf 'blob %s\0' "$(ls -l "$1" | awk '{print $5;}')" | cat - "$1" | sha1sum | awk '{print $1}'
 }
 
 # Now for lots of extra code to make pretty prompts
@@ -385,15 +385,17 @@ cd() {
 	    CURRDIR="$(printf "%sGit %s%s%s" "${COL_BLUE}" "${COL_YELLOW}" "$(basename ${PWD})" "${COL_NORM}")"
 	else
 	    BRANCH=$(git symbolic-ref HEAD) # $(git branch | sed -ne 's/* \(.*\)/\1/p')
-            BRANCH=${BRANCH:##*/}
+	    BRANCH=${BRANCH:##*/}
 	    GS="$(git status 2>&1)"
 	    _cd_cwd="$(print ${PWD#$HOME/code} | tr -d "[:alnum:]_.-")$(basename ${PWD})"
 
 	    if [[ "${GS}" =~ "unmerged paths" ]]; then
 		BRANCH+='|MERGING'
 		SLINE="${COL_GREEN}${_cd_cwd}${COL_NORM}"
-	    elif [[ "${GS}" =~ "modified" ]]; then
+	    elif [[ "${GS}" =~ "modified" ]] || [[ "${GS}" =~ "Changes to be committed" ]]; then
 		SLINE="${COL_RED}${COL_BOLD}${_cd_cwd}${COL_UNBOLD}${COL_NORM}"
+	    elif [[ "${GS}" =~ "Your branch is ahead" ]]; then
+		SLINE="${COL_YELLOW}${COL_BOLD}${_cd_cwd}${COL_UNBOLD}${COL_NORM}"
 	    else
 		SLINE="${COL_WHITE}${_cd_cwd}${COL_NORM}"
 	    fi
@@ -419,7 +421,7 @@ getdirstat() {
 }
 
 termtitle() {
-	printf "\033]0;${TERM_TITLE}\007"
+    printf "\033]0;${TERM_TITLE}\007"
 }
 
 PS1='$(termtitle)${COL_NORM}[ ${INFOLINE} $(xdate) $(getdirstat) ]
