@@ -379,7 +379,7 @@ cd() {
 	    CURRDIR="$(printf "%s%s %sSVN v.%s%s" "${COL_BLUE}" ${VCSINFO[0]} "${COL_GREEN}" ${VCSINFO[1]} "${COL_NORM}")"
 	fi
     elif $(is_gitrepo); then
-	VCSINFO=( $(git config remote.origin.url | sed -ne 's/.*:\(.*\)\/\(.*\).git$/\1 \2/p') )
+	VCSINFO=( $(git config remote.origin.url | sed -ne 's/.*:\/\/\(.*\)\/\(.*\).git$/\1 \2/p') )
 	
 	if (( ${#VCSINFO[@]} < 2 )); then
 	    CURRDIR="$(printf "%sGit %s%s%s" "${COL_BLUE}" "${COL_YELLOW}" "$(basename ${PWD})" "${COL_NORM}")"
