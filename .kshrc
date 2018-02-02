@@ -11,13 +11,14 @@ if [ -f /etc/kshrc ]; then
     . /etc/kshrc
 fi
 
-export LC_ALL="C"
-export LANG="en_GB.UTF-8"
-export SHELL="/bin/ksh"
-export OS=$(uname -s)
-export HOSTNAME=$(hostname -s)
-export PRD=${PWD/$HOME\//}
-export TERM_TITLE=$(basename $(tty))
+typeset LC_ALL="C"
+typeset LANG="en_GB.UTF-8"
+typeset SHELL="/bin/ksh"
+typeset OS=$(uname -s)
+typeset -u HOSTNAME=$(hostname -s)
+typeset PRD=${PWD/$HOME\//}
+typeset TERM_TITLE=$(basename $(tty))
+typeset -x LC_ALL LANG SHELL OS HOSTNAME PRD TERM_TITLE
 
 # Conditional PATH updates
 #
@@ -55,6 +56,9 @@ alias cdt='cd ${PWD%/trunk/*}/trunk'
 alias tl='jove ~/.tasks'
 alias pwe='openssl enc -aes-256-cbc -salt -in ~/.pw.txt -out ~/.pw.enc && rm ~/.pw.txt'
 alias pwc='openssl enc -aes-256-cbc -d -in ~/.pw.enc -out ~/.pw.txt'
+alias wn='printf "%(%W)T\n" now'
+alias sssh='pssh -i -t8 -x " -q"'
+alias ssssh='pssh -i -t8 -x " -q" -x " -tt"'
 
 alias fgw='export COL_NORM=${COL_WHITE}'
 alias fgk='export COL_NORM=${COL_BLACK}'
@@ -314,16 +318,12 @@ case "${TERM}" in
 	;;
 esac
 
-typeset hn
-case ${HOSTNAME} in
-    Walter*) hn="";;
-    *) hn="@${HOSTNAME}";;
-esac
+typeset hn="@${HOSTNAME}";
 
 strata() {
     if [[ -z ${hosttype} ]]; then
 	case ${HOSTNAME} in
-	    Walter*|bloch|macnoobl*) hosttype="Lo";;
+	    *WALTER*|*DAVIES*|BLOCH|MACNOOBL*) hosttype="Lo";;
 	esac
     fi
     
@@ -366,7 +366,7 @@ cd() {
     else
 	command cd "${@}"
     fi
-
+    
     columns=$(tput cols)
     PRD=${PWD/$HOME\//}
     
