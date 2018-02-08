@@ -288,6 +288,8 @@ export hosttype=""
 export COL_NORM=""
 export COL_BOLD=""
 export COL_UNBOLD=""
+export COL_UBAR=""
+export COL_UNUBAR=""
 export COL_RED=""
 export COL_GREEN=""
 export COL_BLUE=""
@@ -304,6 +306,8 @@ case "${TERM}" in
 	if [[ -x $(type -p tput) ]]; then
 	    COL_BOLD="$(tput smso)"
 	    COL_UNBOLD="$(tput rmso)"
+	    COL_UBAR="$(tput smul)"
+	    COL_UNUBAR="$(tput rmul)"
 	    COL_BLACK="$(tput setaf 0)"
 	    COL_RED="$(tput setaf 1)"
 	    COL_GREEN="$(tput setaf 2)"
@@ -396,6 +400,8 @@ cd() {
 		SLINE="${COL_RED}${COL_BOLD}${_cd_cwd}${COL_UNBOLD}${COL_NORM}"
 	    elif [[ "${GS}" =~ "Your branch is ahead" ]]; then
 		SLINE="${COL_YELLOW}${COL_BOLD}${_cd_cwd}${COL_UNBOLD}${COL_NORM}"
+	    elif [[ "${GS}" =~ "Untracked files" ]]; then
+		SLINE="${COL_UBAR}${_cd_cwd}${COL_UNUBAR}${COL_NORM}"
 	    else
 		SLINE="${COL_WHITE}${_cd_cwd}${COL_NORM}"
 	    fi
