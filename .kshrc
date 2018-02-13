@@ -356,7 +356,7 @@ is_gitrepo() {
 typeset -a VCSINFO=( )
 
 cd() {
-    typeset _cd_cwd
+    typeset _cd_cwd _vcc _vccpref _vccpost
 
     if [[ ${1} == -d ]]; then
 	if [[ -d ${2} ]]; then
@@ -383,12 +383,16 @@ cd() {
 	    CURRDIR="$(printf "%s%s %sSVN v.%s%s" "${COL_BLUE}" ${VCSINFO[0]} "${COL_GREEN}" ${VCSINFO[1]} "${COL_NORM}")"
 	fi
     elif $(is_gitrepo); then
-	VCSINFO=( $(git config remote.origin.url | sed -ne 's/.*:\/\/\(.*\)\/\(.*\).git$/\1 \2/p') )
+	_vcc=$(git config remote.origin.url)
+	_vccpref=${_vcc#http*\/\/}
+	_vccpref=${_vcc#git@}
+	_vccpost=${_vcc##*/}
+	VCSINFO=( ${_vccpref%%/*} ${_vccpost%.git} )
 	
 	if (( ${#VCSINFO[@]} < 2 )); then
 	    CURRDIR="$(printf "%sGit %s%s%s" "${COL_BLUE}" "${COL_YELLOW}" "$(basename ${PWD})" "${COL_NORM}")"
 	else
-	    BRANCH=$(git symbolic-ref HEAD) # $(git branch | sed -ne 's/* \(.*\)/\1/p')
+	    BRANCH=$(git symbolic-ref HEAD)
 	    BRANCH=${BRANCH:##*/}
 	    GS="$(git status 2>&1)"
 	    _cd_cwd="$(print ${PWD#$HOME/code} | tr -d "[:alnum:]_.-")$(basename ${PWD})"
