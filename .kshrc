@@ -17,7 +17,7 @@ typeset SHELL="/bin/ksh"
 typeset OS=$(uname -s)
 typeset -u HOSTNAME=$(hostname -s)
 typeset PRD=${PWD/$HOME\//}
-typeset TERM_TITLE=$(basename $(tty))
+typeset TERM_TITLE=$(tty); TERM_TITLE=${TERM_TITLE##*/}
 typeset -x LC_ALL LANG SHELL OS HOSTNAME PRD TERM_TITLE
 
 # Conditional PATH updates
@@ -131,54 +131,54 @@ function awslist
 
 function wb
 {
-    typeset dir=${1:-.}
+    typeset _wb_dir=${1:-.}
 
-    if [[ -d ${dir} ]]; then
-	( cd ${dir}; git branch -v )
+    if [[ -d ${_wb_dir} ]]; then
+	( cd ${_wb_dir}; git branch -v )
     else
-	print -u2 "wb error: no such directory ${dir}"
+	print -u2 "wb error: no such directory ${_wb_dir}"
     fi
 }
 
 function md5ign
 {
-    typeset md5ign_file md5ign_sign
+    typeset _md5ign_file _md5ign_sign
     
-    for md5ign_file in ${@}; do
-	md5ign_sign=$(egrep -v '#.*' ${md5ign_file} | LC_ALL=C sort -bdf | tr -d '[:space:]' | ${MD5})
-	printf "%s %s\n" "${md5ign_sign}" "${md5ign_file}"
+    for _md5ign_file in ${@}; do
+	_md5ign_sign=$(egrep -v '#.*' ${_md5ign_file} | LC_ALL=C sort -bdf | tr -d '[:space:]' | ${MD5})
+	printf "%s %s\n" "${_md5ign_sign}" "${_md5ign_file}"
     done
 }
 
 function md5dir
 {
-    typeset dirname
-    typeset -i rcsv
+    typeset _md5_dirname
+    typeset -i _md5_rcsv
     
     case ${1} in
-	-r) (( rcsv = 1 )); dirname=${2:-.} ;;
-	*) dirname=${1} ;;
+	-r) (( _md5_rcsv = 1 )); _md5_dirname=${2:-.} ;;
+	*) _md5_dirname=${1} ;;
     esac
 
-    if (( rcsv == 1 )); then
-	find ${dirname} -type f -exec ${MD5} {} \;
+    if (( _md5_rcsv == 1 )); then
+	find ${_md5_dirname} -type f -exec ${MD5} {} \;
     else
-	if [[ -d ${dirname} ]]; then
-	    tar -cf - ${dirname} | ${MD5}
+	if [[ -d ${_md5_dirname} ]]; then
+	    tar -cf - ${_md5_dirname} | ${MD5}
 	else
-	    print -u2 "md5dir error: ${dirname} does not exist or is not a directory"
+	    print -u2 "md5dir error: ${_md5_dirname} does not exist or is not a directory"
 	fi
     fi
 }
 
 function man2pdf
 {
-    typeset -a mans=( $@ )
-    typeset manpage
+    typeset -a _m2p_mans=( $@ )
+    typeset _m2p_manp
 
-    if (( ${#mans[@]} > 0 )); then
-	for manpage in ${mans[@]}; do
-	    man -t ${manpage} | ps2pdf - ${manpage}.pdf
+    if (( ${#_m2p_mans[@]} > 0 )); then
+	for _m2p_manp in ${_m2p_mans[@]}; do
+	    man -t ${_m2p_manp} | ps2pdf - ${_m2p_manp}.pdf
 	done
     else
 	print "specify one or more manpages for output to PDF"
@@ -187,38 +187,38 @@ function man2pdf
 
 function enumerate
 {
-    typeset -i linenum
-    typeset line
-    typeset readfile
+    typeset -i _en_linenum
+    typeset _en_line
+    typeset _en_readfile
 
-    for readfile in $@; do
-	printf "::::::::\nEnumerating %s\n::::::::\n" ${readfile}
-	linenum=0
+    for _en_readfile in $@; do
+	printf "::::::::\nEnumerating %s\n::::::::\n" ${_en_readfile}
+	_en_linenum=0
 	OLDIFS="$IFS"
 	IFS='\'
 
-	while read -r line; do
-	    (( linenum++ ))
-	    printf "%4d: %s\n" ${linenum} "$line"
-	done < ${readfile} | less
+	while read -r _en_line; do
+	    (( _en_linenum++ ))
+	    printf "%4d: %s\n" ${_en_linenum} "${_en_line}"
+	done < ${_en_readfile} | less
 	
 	IFS="$OLDIFS"
     done
 }
 
 function where {
-    typeset string=$1
-    typeset -a lines
+    typeset _where_string=${1}
+    typeset -a _where_lines
 
     if [[ -z $2 ]]; then
 	print "usage: where <string> <file(s)>"
     else
-	printf "Searching for occurrences of %s...\n" ${string}
+	printf "Searching for occurrences of %s...\n" ${_where_string}
 	for filename in ${@:2}; do
 	    if [[ -r ${filename} ]]; then
-		lines=( $(grep -n ${string} ${filename} | cut -d: -f1) )
+		_where_lines=( $(grep -n ${_where_string} ${filename} | cut -d: -f1) )
 		
-		printf "%s: %d lines; %s\n" ${filename} $(wc -l < ${filename}) "${lines[*]}"
+		printf "%s: %d lines; %s\n" ${filename} $(wc -l < ${filename}) "${_where_lines[*]}"
 	    else
 		printf "error: unable to read file: %s\n" ${filename}
 	    fi
@@ -227,49 +227,49 @@ function where {
 }
 
 function xdate {
-    typeset datestamp datestring datearg;
+    typeset _x_datestamp _x_datestring _x_datearg;
 
     if (( ${#} > 0 )); then
-	for datearg in ${@}; do
-	    if [[ ${datearg} =~ [0-9,a-f,A-F] ]]; then
-		if [[ ${datearg} =~ 0x ]]; then
-		    datestamp=$(printf "%d" ${datearg})
+	for _x_datearg in ${@}; do
+	    if [[ ${_x_datearg} =~ [0-9,a-f,A-F] ]]; then
+		if [[ ${_x_datearg} =~ 0x ]]; then
+		    _x_datestamp=$(printf "%d" ${_x_datearg})
 		else
-		    datestamp=$(printf "%d" 0x${datearg})
+		    _x_datestamp=$(printf "%d" 0x${_x_datearg})
 		fi
-		datestring=$(printf '%(%FT%T)T' '#'${datestamp})
+		_x_datestring=$(printf '%(%FT%T)T' '#'${_x_datestamp})
 	    else
-		datestring=$(printf "%X" ${1})
+		_x_datestring=$(printf "%X" ${1})
 	    fi
 	done
     else
-	datestring=$(printf "%X" $(printf '%(%s)T' now))
+	_x_datestring=$(printf "%X" $(printf '%(%s)T' now))
     fi
 
-    print ${datestring}
+    print ${_x_datestring}
 }
 
 function oldxdate {
-    typeset datestamp datestring datearg;
+    typeset _ox_datestamp _ox_datestring _ox_datearg;
 
     if (( $# > 0 )); then
-	for datearg in $@; do
-	    if [[ ${datearg} =~ [0-9,a-f,A-F] ]]; then
-		if [[ ${datearg} =~ 0x ]]; then
-		    datestamp=$(printf "%d" ${datearg})
+	for _ox_datearg in $@; do
+	    if [[ ${_ox_datearg} =~ [0-9,a-f,A-F] ]]; then
+		if [[ ${_ox_datearg} =~ 0x ]]; then
+		    _ox_datestamp=$(printf "%d" ${_ox_datearg})
 		else
-		    datestamp=$(printf "%d" 0x${datearg})
+		    _ox_datestamp=$(printf "%d" 0x${_ox_datearg})
 		fi
-		datestring=$(print ${datestamp} | sed -e 's/\(....\)\(..\)\(..\)\(..\)\(..\)\(..\)/\1-\2-\3T\4:\5:\6/g')
+		_ox_datestring=$(print ${_ox_datestamp} | sed -e 's/\(....\)\(..\)\(..\)\(..\)\(..\)\(..\)/\1-\2-\3T\4:\5:\6/g')
 	    else
-		datestring=$(printf "%X" $1)
+		_ox_datestring=$(printf "%X" $1)
 	    fi
 	done
     else
-	datestring=$(printf "%X" $(date +"%Y%m%d%H%M%S"))
+	_ox_datestring=$(printf "%X" $(date +"%Y%m%d%H%M%S"))
     fi
 
-    print ${datestring}
+    print ${_ox_datestring}
 }
 
 function whatkey {
@@ -340,24 +340,24 @@ typeset WHOWHERE="$(whoami)${hn}"
 typeset INFOLINE="${SHELL}"
 typeset SLINE=""
 typeset BRANCH=""
-typeset GS=""
 
 is_gitrepo() {
-    dir=$(pwd)
+    typeset _is_grdir=${PWD}
     
-    while [[ ${dir} != "" ]]; do
-	[[ -d ${dir}/.git ]] && exit 0
-	dir=${dir%/*}
+    while [[ ${_is_grdir} != "" ]]; do
+	[[ -d ${_is_grdir}/.git ]] && exit 0
+	_is_grdir=${_is_grdir%/*}
     done
-    
+
     exit 1
 }
 
 typeset -a VCSINFO=( )
 
 cd() {
-    typeset _cd_cwd _vcc _vccpref _vccpost
-
+    typeset _cd_gs _cd_cwd _vcc _vccpref _vccpost
+    typeset -i _cd_gi
+    
     if [[ ${1} == -d ]]; then
 	if [[ -d ${2} ]]; then
 	    print -u2 "directory ${2} exists"
@@ -378,7 +378,7 @@ cd() {
 	VCSINFO=( $(sed -n 's/^\/svn\/repos\///g;s/\/\!/ /g;s/svn\/ver\///g;s/\([0-9]*\)\//\1:\//p' ./.svn/all-wcprops) )
 	
 	if (( ${#VCSINFO[@]} < 2 )); then
-	    CURRDIR="$(printf "%sSVN%s %s%s" "${COL_BLUE}" "${COL_GREEN}" "$(basename ${PWD})" "${COL_NORM}")"
+	    CURRDIR="$(printf "%sSVN%s %s%s" "${COL_BLUE}" "${COL_GREEN}" "${PWD##*/}" "${COL_NORM}")"
 	else
 	    CURRDIR="$(printf "%s%s %sSVN v.%s%s" "${COL_BLUE}" ${VCSINFO[0]} "${COL_GREEN}" ${VCSINFO[1]} "${COL_NORM}")"
 	fi
@@ -390,21 +390,26 @@ cd() {
 	VCSINFO=( ${_vccpref%%/*} ${_vccpost%.git} )
 	
 	if (( ${#VCSINFO[@]} < 2 )); then
-	    CURRDIR="$(printf "%sGit %s%s%s" "${COL_BLUE}" "${COL_YELLOW}" "$(basename ${PWD})" "${COL_NORM}")"
+	    CURRDIR="$(printf "%sGit %s%s%s" "${COL_BLUE}" "${COL_YELLOW}" "${PWD##*/}" "${COL_NORM}")"
 	else
 	    BRANCH=$(git symbolic-ref HEAD)
 	    BRANCH=${BRANCH:##*/}
-	    GS="$(git status 2>&1)"
-	    _cd_cwd="$(print ${PWD#$HOME/code} | tr -d "[:alnum:]_.-")$(basename ${PWD})"
-
-	    if [[ "${GS}" =~ "unmerged paths" ]]; then
+	    _cd_gs="$(git status 2>&1)"
+	    _cd_cwd="$(print ${PWD#$HOME/code} | tr -d "[:alnum:]_.-")${PWD##*/}"
+	    _cd_gi=$(egrep -c -v '^#' $(git rev-parse --show-toplevel)/.git/info/exclude)
+	    
+	    if (( _cd_gi > 0 )); then
+		_cd_cwd="!!${_cd_cwd}"
+	    fi
+	    
+	    if [[ "${_cd_gs}" =~ "unmerged paths" ]]; then
 		BRANCH+='|MERGING'
 		SLINE="${COL_GREEN}${_cd_cwd}${COL_NORM}"
-	    elif [[ "${GS}" =~ "modified" ]] || [[ "${GS}" =~ "Changes to be committed" ]]; then
+	    elif [[ "${_cd_gs}" =~ "modified" ]] || [[ "${_cd_gs}" =~ "Changes to be committed" ]]; then
 		SLINE="${COL_RED}${COL_BOLD}${_cd_cwd}${COL_UNBOLD}${COL_NORM}"
-	    elif [[ "${GS}" =~ "Your branch is ahead" ]]; then
+	    elif [[ "${_cd_gs}" =~ "Your branch is ahead" ]]; then
 		SLINE="${COL_YELLOW}${COL_BOLD}${_cd_cwd}${COL_UNBOLD}${COL_NORM}"
-	    elif [[ "${GS}" =~ "Untracked files" ]]; then
+	    elif [[ "${_cd_gs}" =~ "Untracked files" ]]; then
 		SLINE="${COL_UBAR}${_cd_cwd}${COL_UNUBAR}${COL_NORM}"
 	    else
 		SLINE="${COL_WHITE}${_cd_cwd}${COL_NORM}"
@@ -415,7 +420,7 @@ cd() {
     else
 	VCSINFO=( 0 0 )
 	_cd_cwd=${PWD/$HOME/\~}
-	CURRDIR="${COL_GREEN}$(print ${_cd_cwd} | tr -d "[:alnum:]_.-")$(basename ${PWD})${COL_NORM}"
+	CURRDIR="${COL_GREEN}$(print ${_cd_cwd} | tr -d "[:alnum:]_.-")${PWD##*/}${COL_NORM}"
     fi    
 
     if (( infocols + ${#CURRDIR} > columns )); then
