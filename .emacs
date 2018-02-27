@@ -11,8 +11,7 @@
 
 ;; Hooks and info for Golang
 ;; (add-to-list 'load-path "/opt/go/misc/emacs/" t)
-;; (require 'go-mode-load)
-(require 'go-mode)
+(require 'go-mode-load)
 (add-hook 'go-mode-hook
   (lambda ()
     (setq-default)
@@ -53,8 +52,7 @@
  ;; If there is more than one, they won't work right.
  '(column-number-mode t)
  '(ps-paper-type (quote letter))
- '(ps-print-footer nil)
- '(tool-bar-mode nil))
+ '(ps-print-footer nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
