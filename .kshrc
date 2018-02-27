@@ -410,6 +410,9 @@ cd() {
 	    if [[ "${_cd_gs}" =~ "unmerged paths" ]]; then
 		BRANCH+='|MERGING'
 		SLINE="${COL_GREEN}${_cd_cwd}${COL_NORM}"
+	    elif [[ "${_cd_gs}" =~ "have diverged" ]]; then
+		BRANCH+='|DIVERGENT'
+		SLINE="${COL_YELLOW}${COL_UBAR}${_cd_cwd}${COL_UNUBAR}${COL_NORM}"
 	    elif [[ "${_cd_gs}" =~ "modified" ]] || [[ "${_cd_gs}" =~ "Changes to be committed" ]]; then
 		SLINE="${COL_RED}${COL_BOLD}${_cd_cwd}${COL_UNBOLD}${COL_NORM}"
 	    elif [[ "${_cd_gs}" =~ "Your branch is ahead" ]]; then
