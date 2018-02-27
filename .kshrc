@@ -70,6 +70,11 @@ alias line='grep -n --colour'
 
 # Useful functions
 #
+function .sh.math.aqr x
+{
+    (( .sh.value = (( x * x )) ))
+}
+
 function .sh.math.fac n
 {
     typeset -li f=1 i
