@@ -394,7 +394,7 @@ cd() {
 	_vccpost=${_vcc##*/}
 	VCSINFO=( ${_vccpref%%/*} ${_vccpost%.git} )
 	
-	if (( ${#VCSINFO[@]} < 2 )); then
+	if (( ${#VCSINFO[@]} < 2 )); then	    
 	    CURRDIR="$(printf "%sGit %s%s%s" "${COL_BLUE}" "${COL_YELLOW}" "${PWD##*/}" "${COL_NORM}")"
 	else
 	    BRANCH=$(git symbolic-ref HEAD)
@@ -402,6 +402,12 @@ cd() {
 	    _cd_gs="$(git status 2>&1)"
 	    _cd_cwd="$(print ${PWD#$HOME/code} | tr -d "[:alnum:]_.-")${PWD##*/}"
 	    _cd_gi=$(egrep -c -v '^#' $(git rev-parse --show-toplevel)/.git/info/exclude)
+	    
+	    case ${VCSINFO[0]} in
+		'ssh:'|'http:'|'https:')
+		    VCSINFO[0]=${VCSINFO[0]/:}
+		    ;;
+	    esac
 	    
 	    if (( _cd_gi > 0 )); then
 		_cd_cwd="!!${_cd_cwd}"
