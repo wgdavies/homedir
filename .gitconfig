@@ -11,6 +11,7 @@
 	st = status
 	stat = status
 	unstage = reset HEAD --
+	uncommit = reset HEAD^
 	last = log -1 HEAD
 	log = log --graph --pretty=format:'%Cred%h%Creset %C(yellow)%an%d%Creset %s %Cgreen(%cr)%Creset' --date=relative
 	poll = "!git pull origin \"$(git rev-parse --abbrev-ref HEAD)\""
