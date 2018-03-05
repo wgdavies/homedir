@@ -9,6 +9,10 @@
 (add-to-list 'interpreter-mode-alist
 	     '("ksh93" . shell-script-mode))
 
+;; Hooks and info for Git
+(require 'git)
+(require 'git-blame)
+
 ;; Hooks and info for Golang
 ;; (add-to-list 'load-path "/opt/go/misc/emacs/" t)
 (require 'go-mode-load)
