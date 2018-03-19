@@ -454,7 +454,7 @@ termtitle() {
 }
 
 PS1='$(termtitle)${COL_NORM}[ ${INFOLINE} $(xdate) $(getdirstat) ]
-${COL_NORM}$ ${COL_WHITE}'
+${COL_NORM}$ ${COL_BLACK}'
 
 [ -r /etc/environment ] && . /etc/environment
 [ -r ~/.localenv ] && . ~/.localenv
