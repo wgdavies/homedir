@@ -1,0 +1,36 @@
+#!/bin/ksh
+
+PATH=/usr/bin
+
+typeset -i DEFSTRLENGTH=48
+typeset -i DEFDIVISOR=2
+typeset -i defcols defrows rand div
+
+while true; do
+	defcols=$(( ${COLUMNS:-$(tput lines)} - DEFSTRLENGTH ))
+	defrows=${LINES:-$(tput lines)}
+	rand=${RANDOM}
+	(( div = DEFDIVISOR ))
+	
+	tput clear
+	
+	until (( 0 <= rand )) && (( rand <= DEFSTRLENGTH )); do
+		(( rand = (( rand / div )) ))
+		(( ++div ))
+	done
+	
+	(( defcols = rand ))
+	(( div = DEFDIVISOR ))
+	
+	until (( 0 <= rand )) && (( rand <= defrows )); do
+		(( rand = (( rand / div )) ))
+		(( ++div ))
+	done
+	
+	(( defrows = rand ))
+	
+	tput cup ${defrows} ${defcols}
+	printf '%(It is now %T on %A, %d %B %Y)T\r' now
+	sleep ${div}
+done
+
