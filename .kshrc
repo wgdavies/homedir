@@ -332,7 +332,7 @@ typeset hn="@${HOSTNAME}";
 strata() {
     if [[ -z ${hosttype} ]]; then
 	case ${HOSTNAME} in
-	    *WALTER*|*DAVIES*|BLOCH|MACNOOBL*) hosttype="Lo";;
+	    *WALTER*|*DAVIES*|BLOCH|MACNOOBL*|GOLDSMITH) hosttype="Lo";;
 	esac
     fi
     
