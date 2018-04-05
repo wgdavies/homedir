@@ -1,0 +1,22 @@
+#!/bin/ksh
+
+typeset -i i j
+
+while true; do
+    for (( j = 0 ; j < 40 ; ++j )); do
+	for (( i = 0 ; i < 160 ; ++i )); do
+	    if (( ${RANDOM: -1} == 1 )); then
+		printf "."
+	    else
+		printf " "
+	    fi
+	done
+
+	if (( j < 39 )); then
+	    printf "\n"
+	fi
+    done
+
+    sleep 1
+    tput cup 0 0
+done

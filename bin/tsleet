@@ -1,0 +1,27 @@
+#!/bin/ksh
+
+typeset -i i j k=0
+
+while true; do
+    for (( j = 0 ; j < 40 ; ++j )); do
+	for (( i = 0 ; i < 160 ; ++i )); do
+	    (( k = ${RANDOM: -1} ))
+
+	    case ${k} in
+		0) printf "*";;
+		1) printf "-";;
+		2) printf "/";;
+		3) printf "|";;
+		4) printf "\\";;
+		?) printf " ";;
+	    esac;
+	done;
+
+	if (( j < 39 )); then
+	    printf "\n"
+	fi
+    done
+
+    sleep 1
+    tput cup 0 0
+done
