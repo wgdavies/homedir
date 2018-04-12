@@ -31,6 +31,15 @@ while true; do
 	
 	tput cup ${defrows} ${defcols}
 	printf "It is now $(date +'%T %A, %d %B %Y')\r" now
+	
+	if (( (( defrows + div )) >= $(tput lines) )); then
+		(( defrows = (( defrows - (( div * div )) )) ))
+		(( defcols = (( defcols - (( div * div )) )) ))
+	else
+		(( defrows = (( defrows + div )) ))
+		(( defcols = (( defcols + div )) ))
+	fi
+
 	tput cup $(( defrows + div )) $(( ++defcols ))
 	printf "\t%s\r" ${HOSTNAME}
 	sleep ${div}
