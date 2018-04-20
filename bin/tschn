@@ -15,7 +15,7 @@ while true; do
 	tput clear
 	
 	until (( 0 <= rand )) && (( rand <= DEFSTRLENGTH )); do
-		(( rand = (( rand / div )) ))
+		(( rand /= div ))
 		(( ++div ))
 	done
 	
@@ -23,7 +23,7 @@ while true; do
 	(( div = DEFDIVISOR ))
 	
 	until (( 0 <= rand )) && (( rand <= defrows )); do
-		(( rand = (( rand / div )) ))
+		(( rand /= div ))
 		(( ++div ))
 	done
 	
@@ -33,11 +33,11 @@ while true; do
 	printf "It is now $(date +'%T %A, %d %B %Y')\r" now
 	
 	if (( (( defrows + div )) >= $(tput lines) )); then
-		(( defrows = (( defrows - (( div * div )) )) ))
-		(( defcols = (( defcols - (( div * div )) )) ))
+		(( defrows -= div ** 2 ))
+		(( defcols -= div ** 2 ))
 	else
-		(( defrows = (( defrows + div )) ))
-		(( defcols = (( defcols + div )) ))
+		(( defrows += div ))
+		(( defcols += div ))
 	fi
 
 	tput cup $(( defrows + div )) $(( ++defcols ))
