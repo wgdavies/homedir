@@ -1,1 +1,16 @@
-while true; do for (( i = 0 ; i < COLUMNS ; ++i )); do if (( ${RANDOM: -1} > 5 )); then printf "%s" '/'; else printf "%s" '\'; fi; sleep 0.1; done; sleep 0.1; printf "\n"; done
+#!/bin/ksh
+
+while true; do
+	for (( i = 0 ; i < COLUMNS ; ++i )); do
+		if (( ${RANDOM: -1} > 5 )); then
+			printf "%s" '/'
+			else printf "%s" '\'
+		fi
+
+		sleep 0.1
+	done
+
+	sleep 0.1
+	printf "\n"
+done
+
