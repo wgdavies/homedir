@@ -1,6 +1,6 @@
 #!/bin/ksh
 
-typeset -i target=${$1:-8}
+typeset -i target=${1:-8}
 typeset -i it=0
 typeset -i count=0
 
