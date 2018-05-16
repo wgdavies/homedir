@@ -29,4 +29,10 @@ if [[ -r ~/.tasks ]]; then
 	fi
 fi
 
+# HebCal
+if [[ -x /usr/local/bin/hebcal ]]; then
+	export HEBCAL_OPTS=' -T -r -o -s -S -Z -d -D -e -E -F -8 '
+	/usr/local/bin/hebcal
+fi
+
 cd
