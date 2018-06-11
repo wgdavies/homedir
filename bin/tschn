@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO: use tput [s|r]mcup to start and end 'alternate screen' sessions
+
 PATH=/bin:/usr/bin
 
 typeset -i DEFSTRLENGTH=48
