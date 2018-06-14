@@ -9,6 +9,9 @@
 (add-to-list 'interpreter-mode-alist
 	     '("ksh93" . shell-script-mode))
 
+;; Set default shell for [ansi-]term mode
+(setq explicit-shell-file-name "/bin/ksh")
+
 ;; Hooks and info for Git
 (require 'git)
 (require 'git-blame)
