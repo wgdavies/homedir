@@ -450,7 +450,14 @@ getdirstat() {
 }
 
 termtitle() {
-    printf "\033]0;${TERM_TITLE}\007"
+    case ${TERM} in
+	eterm*)
+	    return
+	    ;;
+	*)
+	    printf "\033]0;${TERM_TITLE}\007"
+	    ;;
+    esac
 }
 
 PS1='$(termtitle)${COL_NORM}[ ${INFOLINE} $(xdate) $(getdirstat) ]
