@@ -70,6 +70,11 @@ alias line='grep -n --colour'
 
 # Useful functions
 #
+function .sh.math.sqr x
+{
+    (( .sh.value = (( x * x )) ))
+}
+
 function .sh.math.fac n
 {
     typeset -li f=1 i
@@ -327,7 +332,7 @@ typeset hn="@${HOSTNAME}";
 strata() {
     if [[ -z ${hosttype} ]]; then
 	case ${HOSTNAME} in
-	    *WALTER*|*DAVIES*|BLOCH|MACNOOBL*) hosttype="Lo";;
+	    *WALTER*|*DAVIES*|BLOCH|MACNOOBL*|GOLDSMITH) hosttype="Lo";;
 	esac
     fi
     
@@ -389,7 +394,7 @@ cd() {
 	_vccpost=${_vcc##*/}
 	VCSINFO=( ${_vccpref%%/*} ${_vccpost%.git} )
 	
-	if (( ${#VCSINFO[@]} < 2 )); then
+	if (( ${#VCSINFO[@]} < 2 )); then	    
 	    CURRDIR="$(printf "%sGit %s%s%s" "${COL_BLUE}" "${COL_YELLOW}" "${PWD##*/}" "${COL_NORM}")"
 	else
 	    BRANCH=$(git symbolic-ref HEAD)
@@ -398,6 +403,12 @@ cd() {
 	    _cd_cwd="$(print ${PWD#$HOME/code} | tr -d "[:alnum:]_.-")${PWD##*/}"
 	    _cd_gi=$(egrep -c -v '^#' $(git rev-parse --show-toplevel)/.git/info/exclude)
 	    
+	    case ${VCSINFO[0]} in
+		'ssh:'|'http:'|'https:')
+		    VCSINFO[0]=${VCSINFO[0]/:}
+		    ;;
+	    esac
+	    
 	    if (( _cd_gi > 0 )); then
 		_cd_cwd="!!${_cd_cwd}"
 	    fi
@@ -405,6 +416,9 @@ cd() {
 	    if [[ "${_cd_gs}" =~ "unmerged paths" ]]; then
 		BRANCH+='|MERGING'
 		SLINE="${COL_GREEN}${_cd_cwd}${COL_NORM}"
+	    elif [[ "${_cd_gs}" =~ "have diverged" ]]; then
+		BRANCH+='|DIVERGENT'
+		SLINE="${COL_YELLOW}${COL_UBAR}${_cd_cwd}${COL_UNUBAR}${COL_NORM}"
 	    elif [[ "${_cd_gs}" =~ "modified" ]] || [[ "${_cd_gs}" =~ "Changes to be committed" ]]; then
 		SLINE="${COL_RED}${COL_BOLD}${_cd_cwd}${COL_UNBOLD}${COL_NORM}"
 	    elif [[ "${_cd_gs}" =~ "Your branch is ahead" ]]; then
@@ -436,11 +450,18 @@ getdirstat() {
 }
 
 termtitle() {
-    printf "\033]0;${TERM_TITLE}\007"
+    case ${TERM} in
+	eterm*)
+	    return
+	    ;;
+	*)
+	    printf "\033]0;${TERM_TITLE}\007"
+	    ;;
+    esac
 }
 
 PS1='$(termtitle)${COL_NORM}[ ${INFOLINE} $(xdate) $(getdirstat) ]
-${COL_NORM}$ ${COL_WHITE}'
+${COL_NORM}$ ${COL_BLACK}'
 
 [ -r /etc/environment ] && . /etc/environment
 [ -r ~/.localenv ] && . ~/.localenv

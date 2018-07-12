@@ -1,0 +1,50 @@
+#!/bin/ksh
+
+typeset -i target=${1:-8}
+typeset -i it=0
+typeset -i count=0
+
+until (( count == target )); do
+    ot=${RANDOM: -3}
+    if (( ot > 32 )) && (( ot < 58 )) || \
+	   (( ot > 64 )) && (( ot < 91 )) || \
+	       (( ot > 96 )) && (( ot < 123 )); then
+	printf "\x$(printf %x ${ot})"
+	(( ++count ))
+    fi
+    (( ++it ))
+done
+
+printf "\n%7d letters" ${target}
+printf "\n%7d iterations" ${it}
+printf "\n%7.3f rounds per letter" $(( ${it}.0 / ${target}.0 ))
+printf "\n%7.5f efficiency ratio\n" $(( ${target}.0 / ${it}.0 ))
+
+## NOTES
+# https://en.wikipedia.org/wiki/ASCII
+# $ cond='(( a == b ))'
+# $ print ${cond}
+# (( a == b ))
+# $ typeset -i a=1 b=1
+# $ if ${cond}; then print omg; else print nope; fi
+# -ksh: ((: not found
+# nope
+# [ wdavies@WDAVIESMBA Lo 5AEA0924 ~wdavies ]
+# omg
+# $ a=2
+# $ if $(eval ${cond}); then print omg; else print nope; fi
+# nope
+# $ b=2                                                    
+# $ if $(eval ${cond}); then print omg; else print nope; fi
+# omg
+# $ cond='(( a > 10 )) && (( a < 100 ))'                   
+# $ a=1                                                    
+# $ if $(eval ${cond}); then print omg; else print nope; fi
+# nope
+# $ a=12                                                   
+# $ if $(eval ${cond}); then print omg; else print nope; fi
+# omg
+# $ a=123                                                  
+# $ if $(eval ${cond}); then print omg; else print nope; fi
+# nope
+

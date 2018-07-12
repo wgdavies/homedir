@@ -1,0 +1,24 @@
+#!/bin/ksh
+
+# TODO: use tput [s|r]mcup to start and end 'alternate screen' sessions
+
+PATH=/bin:/usr/bin
+
+typeset -i i
+typeset -i COLS=${COLUMNS:-$(tput cols)}
+
+while true; do
+	for (( i = 0 ; i < COLS ; ++i )); do
+		if (( ${RANDOM: -1} > 5 )); then
+			printf "%s" '/'
+		else
+			printf "%s" '\'
+		fi
+
+		sleep 0.1
+	done
+
+	sleep 0.1
+	printf "\n"
+done
+

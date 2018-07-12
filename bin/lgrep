@@ -1,0 +1,51 @@
+#!/bin/ksh
+#
+# TODOs:
+# * add description!
+# * fill out help section, manpage, options, &c
+# * options should include:
+# ** -A lines before LINENUM
+# ** -B lines after LINENUM
+# ** -n prepend output with line numbers
+# * default (required) arguments are thus: PROGNAME LINENUM FILE
+
+PATH=/bin:/usr/bin
+
+typeset PROGNAME=${0##*/}
+typeset -i LINENUM=${1}
+typeset -i LINES=${2}
+typeset FILE=${3}
+
+function help {
+    print -u2 "usage: ${PROGNAME} start lines file"
+    print -u2 "\twhere 'start' is the starting line to print"
+    print -u2 "\tand 'lines' is the number of folllowing lines to print"
+    print -u2 "\tand 'file' is the file name to print"
+
+    return 0
+}
+
+if [[ -r ${FILE} ]]; then
+    typeset -i file_lines=0
+
+    while read toss; do (( ++file_lines )); done < ${FILE}
+
+    (( --LINENUM )) ## pre-correct off-by-1 error on head, below
+    
+    if (( LINENUM > 0 )) && (( LINES > 0 )); then
+	if (( (( LINENUM + LINES )) > file_lines)); then
+	    print -u2 "error: ${FILE} has only ${file_lines} lines"
+	    exit 1
+	else
+	    head -$(( LINENUM + LINES )) ${FILE} | tail -${LINES}
+	fi
+    else
+	print -u2 "error: invalid starting line ${LINENUM} or lines to print ${LINES}"
+	help
+	exit 1
+    fi
+else
+    print -u2 "error: unable to read file ${FILE}"
+    help
+    exit 1
+fi
