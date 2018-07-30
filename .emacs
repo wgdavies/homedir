@@ -30,6 +30,10 @@
 (setq c-default-style "bsd"
 	c-basic-offset 4)
 
+;; Hooks for CLang
+(require 'clang-format)
+(global-set-key [C-M-tab] 'clang-format-region)
+
 ;; Documentation module
 (require 'doxymacs)
 (add-hook 'c-mode-common-hook'doxymacs-mode)
