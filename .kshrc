@@ -134,6 +134,17 @@ function awslist
     fi
 }
 
+function wr
+{
+    typeset _wr_dir=${1:-.}
+
+    if [[ -d ${_wr_dir} ]]; then
+	( cd ${_wr_dir}; git remote -v )
+    else
+	print -u2 "wr error: no such directory ${_wr_dir}"
+    fi
+}
+
 function wb
 {
     typeset _wb_dir=${1:-.}
