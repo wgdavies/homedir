@@ -32,6 +32,7 @@
 
 ;; Hooks for CLang
 (require 'clang-format)
+(setq exec-path (append exec-path '("/usr/local/bin/clang-format")))
 (global-set-key [C-M-tab] 'clang-format-region)
 
 ;; Documentation module
