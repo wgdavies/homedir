@@ -32,8 +32,14 @@
 
 ;; Hooks for CLang
 (require 'clang-format)
-(setq exec-path (append exec-path '("/usr/local/bin/clang-format")))
-(global-set-key [C-M-tab] 'clang-format-region)
+;; (setq exec-path (append exec-path '("/usr/local/bin/clang-format")))
+;; (global-set-key [C-M-tab] 'clang-format-region)
+;; 
+;; (require 'clang-format)
+(global-set-key (kbd "C-c i") 'clang-format-region)
+(global-set-key (kbd "C-c u") 'clang-format-buffer)
+
+(setq clang-format-style-option "llvm")
 
 ;; Documentation module
 (require 'doxymacs)
