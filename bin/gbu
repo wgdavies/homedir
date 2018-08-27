@@ -44,6 +44,15 @@ if (( ${#dirlist[@]} > 0 )); then
 	
 	print "Running update on ${TLD}/${list}"
 	cd ${TLD}/${list}
+
+	if [[ ${1} == clean ]]; then
+	    git reset --hard
+
+	    if [[ $(git branch) =~ master ]]; then
+		git checkout master
+	    fi
+	fi
+	
 	git branch -r | grep -v '\->' | \
 	    while read remote; do
 		(( ++branches ))
