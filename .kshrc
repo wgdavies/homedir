@@ -147,13 +147,28 @@ function wr
 
 function wb
 {
-    typeset _wb_dir=${1:-.}
-
-    if [[ -d ${_wb_dir} ]]; then
-	( cd ${_wb_dir}; git branch -v )
-    else
-	print -u2 "wb error: no such directory ${_wb_dir}"
+    typeset -a _wb_list=( ${@} )
+    typeset -i _wb_len=0
+    typeset _wb_dir
+    
+    if (( ${#_wb_list[@]} == 0 )); then
+	_wb_list=( "." )
     fi
+    
+    for _wb_dir in ${_wb_list[@]}; do
+	if (( ${#_wb_dir} > _wb_len )); then
+	    (( _wb_len = ${#_wb_dir} ))
+	fi
+    done
+	
+    for _wb_dir in ${_wb_list[@]}; do
+	if [[ -d ${_wb_dir} ]]; then
+	    printf "%${_wb_len}s: " ${_wb_dir}
+	    ( cd ${_wb_dir}; git branch -v 2>&1 | egrep '^\*' || print "NOTICE: not a Git repo" )
+	else
+	    print -u2 "wb error: no such directory ${_wb_dir}"
+	fi
+    done
 }
 
 function md5ign
