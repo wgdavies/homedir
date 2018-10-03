@@ -30,7 +30,7 @@ function rdir {
     fi
 }
 
-for list in *; do
+for list in ${@}; do
     rdir ${list} 0
 done
 
