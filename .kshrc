@@ -23,6 +23,7 @@ typeset -x LC_ALL LANG SHELL OS HOSTNAME PRD TERM_TITLE
 # Conditional PATH updates
 #
 [[ -d ~/bin ]] && PATH=${PATH}:~/bin
+[[ -d /usr/local ]] && PATH=${PATH}:/usr/local/bin:/usr/local/sbin
 
 # User specific aliases and functions
 #
@@ -152,6 +153,7 @@ function wb
     typeset _wb_dir
     
     if (( ${#_wb_list[@]} == 0 )); then
+<<<<<<< HEAD
 	_wb_list=( "." )
     fi
     
@@ -168,6 +170,24 @@ function wb
 	else
 	    print -u2 "wb error: no such directory ${_wb_dir}"
 	fi
+=======
+        _wb_list=( "." )
+    fi
+    
+    for _wb_dir in ${_wb_list[@]}; do
+        if (( ${#_wb_dir} > _wb_len )); then
+            (( _wb_len = ${#_wb_dir} ))
+        fi
+    done
+        
+    for _wb_dir in ${_wb_list[@]}; do
+        if [[ -d ${_wb_dir} ]]; then
+            printf "%${_wb_len}s: " ${_wb_dir}
+            ( cd ${_wb_dir}; git branch -v 2>&1 | egrep '^\*' || print "NOTICE: not a Git repo" )
+        else
+            print -u2 "wb error: no such directory ${_wb_dir}"
+        fi
+>>>>>>> e6123a8958171114f3e6295f12d855ea0ecd0820
     done
 }
 
@@ -358,7 +378,7 @@ typeset hn="@${HOSTNAME}";
 strata() {
     if [[ -z ${hosttype} ]]; then
 	case ${HOSTNAME} in
-	    *WALTER*|*DAVIES*|BLOCH|MACNOOBL*|GOLDSMITH) hosttype="Lo";;
+	    *) hosttype="Lo";;
 	esac
     fi
     
@@ -492,3 +512,5 @@ ${COL_NORM}$ ${COL_BLACK}'
 [ -r /etc/environment ] && . /etc/environment
 [ -r ~/.localenv ] && . ~/.localenv
 
+export PATH="/usr/local/opt/gettext/bin:$PATH"
+export PATH="/usr/local/opt/gettext/bin:$PATH"

@@ -1,0 +1,84 @@
+#!/bin/ksh
+#
+# Git Bulk Update
+
+PATH=/bin:/usr/bin
+
+typeset TLD=${PWD}
+typeset list
+typeset -a dirlist
+typeset -i MAXDEPTH=4
+typeset -i branches=0 newbranch=0 insynch=0 brancherr=0 repos=0 nbranch=0 sbranch=0 toterr=0 rval=0
+
+function rdir {
+    typeset dir=${1}
+    typeset -i index=${2}
+
+    if [[ -d ${dir} ]]; then
+	if [[ -d ${dir}/.git ]]; then
+	    dirlist+=( ${dir} )
+	else
+	    (( ++index ))
+	    if (( index < MAXDEPTH )); then
+		for dir in ${dir}/*; do
+		    if [[ -d ${dir} ]]; then
+			rdir ${dir} ${index}
+		    fi
+		done
+	    fi
+	fi
+    fi
+}
+
+for list in ${@}; do
+    rdir ${list} 0
+done
+
+if (( ${#dirlist[@]} > 0 )); then
+    for list in ${dirlist[@]}; do
+	(( branches = 0 ))
+	(( newbranch = 0 ))
+	(( insynch = 0 ))
+	(( brancherr = 0 ))
+	(( ++repos ))
+	
+	print "Running update on ${TLD}/${list}"
+	cd ${TLD}/${list}
+
+	if [[ ${1} == clean ]]; then
+	    git reset --hard
+
+	    if [[ $(git branch) =~ master ]]; then
+		git checkout master
+	    fi
+	fi
+	
+	git branch -r | grep -v '\->' | \
+	    while read remote; do
+		(( ++branches ))
+		
+		git branch --track "${remote#origin/}" "${remote}" > /dev/null 2>&1
+		(( rval = $? ))
+		
+		if (( rval == 0 )); then
+		    (( ++newbranch ))
+		    (( ++nbranch ))
+		elif (( rval == 128 )); then
+		    (( ++insynch ))
+		    (( ++sbranch ))
+		else
+		    (( ++brancherr ))
+		    (( ++toterr ))
+		    print -u2 "Git ERROR $? on ${list}/${remote}"
+		fi
+	    done
+	
+	git fetch --all
+	git pull --all
+	printf "Updated %d branches: %d new, %d already synch'd, %d errors\n" ${branches} ${newbranch} ${insynch} ${brancherr}
+    done
+
+    printf "Updated %d repos with %d new branches, %d synch'd branches, and %d errors\n" ${repos} ${nbranch} ${sbranch} ${toterr}
+else
+    print -u2 "NOTICE: no Git directories found under ${TLD}"
+fi

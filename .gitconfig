@@ -9,10 +9,12 @@
 	br = branch
 	ci = commit
 	st = status
+	ck = remote show origin
 	stat = status
 	unstage = reset HEAD --
 	uncommit = reset HEAD^
 	last = log -1 HEAD
+	dt = difftool --dir-diff
 	log = log --graph --pretty=format:'%Cred%h%Creset %C(yellow)%an%d%Creset %s %Cgreen(%cr)%Creset' --date=relative
 	poll = "!git pull origin \"$(git rev-parse --abbrev-ref HEAD)\""
 [transfer]
@@ -24,9 +26,13 @@
 	smudge = git-lfs smudge -- %f
 	required = true
 	process = git-lfs filter-process
-[difftool "sourcetree"]
-	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-	path = 
-[mergetool "sourcetree"]
-	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
-	trustExitCode = true
+# [difftool "sourcetree"]
+#	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+#	path = 
+# [mergetool "sourcetree"]
+#	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+#	trustExitCode = true
+[merge]
+	tool = opendiff
+[diff]
+	tool = meld

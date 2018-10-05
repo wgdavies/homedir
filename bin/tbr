@@ -1,0 +1,7 @@
+#!/bin/bash
+
+PATH=/bin:/usr/bin
+
+# sudo pkill "Touch Bar agent"; # TouchBarServer, perhaps?
+sudo killall "ControlStrip";
+
