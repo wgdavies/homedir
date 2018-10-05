@@ -22,8 +22,9 @@ typeset -x LC_ALL LANG SHELL OS HOSTNAME PRD TERM_TITLE
 
 # Conditional PATH updates
 #
-[[ -d ~/bin ]] && PATH=${PATH}:~/bin
-[[ -d /usr/local ]] && PATH=${PATH}:/usr/local/bin:/usr/local/sbin
+[[ -d ~/bin ]] && PATH+=:~/bin
+[[ -d /usr/local ]] && PATH+=${PATH}:/usr/local/bin:/usr/local/sbin
+[[ -d /usr/local/opt/gettext/bin ]] && PATH+="/usr/local/opt/gettext/bin:$PATH"
 
 # User specific aliases and functions
 #
@@ -50,6 +51,7 @@ if [ -f '/Users/tatti/bin/google-cloud-sdk/path.ksh.inc' ]; then source '/Users/
 alias la='ls -a'
 alias lf='ls -F'
 alias ll='ls -l'
+alias l.='ls -l ${PWD}'
 alias lsd='ls -ld'
 alias lm='/bin/ls'
 alias cdb='cd $OLDPWD'
@@ -137,40 +139,52 @@ function awslist
 
 function wr
 {
-    typeset _wr_dir=${1:-.}
+    typeset -a _wr_all=( ${@} )
+    typeset -a _wr_list
+    typeset -i _wr_len=0
+    typeset _wr_dir
 
-    if [[ -d ${_wr_dir} ]]; then
-	( cd ${_wr_dir}; git remote -v )
-    else
-	print -u2 "wr error: no such directory ${_wr_dir}"
+    if (( ${#_wr_all[@]} == 0 )); then
+	_wr_all=( "." )
     fi
+    
+    for _wr_dir in ${_wr_all[@]}; do
+	if [[ -d ${_wr_dir} ]]; then
+	    _wr_list+=( ${_wr_dir} )
+	    if (( ${#_wr_dir} > _wr_len )); then
+		(( _wr_len = ${#_wr_dir} ))
+	    fi
+	else
+	    print -u2 "wr error: no such directory ${_wr_dir}"
+	fi
+    done
+    
+    for _wr_dir in ${_wr_list[@]}; do
+	printf "\n==== %${_wr_len}s ====\n" ${_wr_dir}
+	( cd ${_wr_dir}; git remote -v 2>&1 | egrep -v '^(fatal|Stopping)' || print -u2 "NOTICE: not a Git repository")
+    done
 }
 
 function wb
 {
-    typeset -a _wb_list=( ${@} )
+    typeset -a _wb_all=( ${@} )
+    typeset -a _wb_list
     typeset -i _wb_len=0
     typeset _wb_dir
     
-    if (( ${#_wb_list[@]} == 0 )); then
-<<<<<<< HEAD
-	_wb_list=( "." )
+    if (( ${#_wb_all[@]} == 0 )); then
+	_wb_all=( "." )
     fi
     
-    for _wb_dir in ${_wb_list[@]}; do
-	if (( ${#_wb_dir} > _wb_len )); then
+    for _wb_dir in ${_wb_all[@]}; do
+	if [[ -d ${_wb_dir} ]]; then
+	    _wb_list+=( ${_wb_dir} )
+	    if (( ${#_wb_dir} > _wb_len )); then
 	    (( _wb_len = ${#_wb_dir} ))
 	fi
-    done
-	
-    for _wb_dir in ${_wb_list[@]}; do
-	if [[ -d ${_wb_dir} ]]; then
-	    printf "%${_wb_len}s: " ${_wb_dir}
-	    ( cd ${_wb_dir}; git branch -v 2>&1 | egrep '^\*' || print "NOTICE: not a Git repo" )
 	else
 	    print -u2 "wb error: no such directory ${_wb_dir}"
 	fi
-=======
         _wb_list=( "." )
     fi
     
@@ -187,7 +201,11 @@ function wb
         else
             print -u2 "wb error: no such directory ${_wb_dir}"
         fi
->>>>>>> e6123a8958171114f3e6295f12d855ea0ecd0820
+    done
+    
+    for _wb_dir in ${_wb_list[@]}; do
+	printf "%${_wb_len}s: " ${_wb_dir}
+	( cd ${_wb_dir}; git branch -v 2>&1 | egrep '^\*' || print -u2 "NOTICE: not a Git repository" )
     done
 }
 
@@ -511,6 +529,3 @@ ${COL_NORM}$ ${COL_BLACK}'
 
 [ -r /etc/environment ] && . /etc/environment
 [ -r ~/.localenv ] && . ~/.localenv
-
-export PATH="/usr/local/opt/gettext/bin:$PATH"
-export PATH="/usr/local/opt/gettext/bin:$PATH"
