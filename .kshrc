@@ -180,13 +180,14 @@ function wb
 	if [[ -d ${_wb_dir} ]]; then
 	    _wb_list+=( ${_wb_dir} )
 	    if (( ${#_wb_dir} > _wb_len )); then
-	    (( _wb_len = ${#_wb_dir} ))
-	fi
+		(( _wb_len = ${#_wb_dir} ))
+	    fi
 	else
 	    print -u2 "wb error: no such directory ${_wb_dir}"
 	fi
+
         _wb_list=( "." )
-    fi
+    done
     
     for _wb_dir in ${_wb_list[@]}; do
         if (( ${#_wb_dir} > _wb_len )); then
