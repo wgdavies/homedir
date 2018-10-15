@@ -71,6 +71,17 @@ alias fgy='export COL_NORM=${COL_GREEN}'
 # Some other useful alises
 alias line='grep -n --colour'
 
+# Set up per-session histories
+#
+if test -t 0; then
+	if [[ ! -d ~/.local ]]; then
+		mkdir ~/.local
+	fi
+	
+	HISTFILE=~/.local/ksh-hist$(tty | tr / .)
+	touch ${HISTFILE}
+fi
+
 # Useful functions
 #
 function .sh.math.sqr x
