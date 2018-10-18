@@ -207,15 +207,6 @@ function wb
     done
         
     for _wb_dir in ${_wb_list[@]}; do
-        if [[ -d ${_wb_dir} ]]; then
-            printf "%${_wb_len}s: " ${_wb_dir}
-            ( cd ${_wb_dir}; git branch -v 2>&1 | egrep '^\*' || print "NOTICE: not a Git repo" )
-        else
-            print -u2 "wb error: no such directory ${_wb_dir}"
-        fi
-    done
-    
-    for _wb_dir in ${_wb_list[@]}; do
 	printf "%${_wb_len}s: " ${_wb_dir}
 	( cd ${_wb_dir}; git branch -v 2>&1 | egrep '^\*' || print -u2 "NOTICE: not a Git repository" )
     done
