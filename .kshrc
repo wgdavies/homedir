@@ -5,10 +5,14 @@ set -o emacs
 set -o ignoreeof
 set -o trackall
 
-# Source global definitions
+# Source global definitions and OS environment
 #
-if [ -f /etc/kshrc ]; then
-    . /etc/kshrc
+if [ -r /etc/kshrc ]; then
+    source /etc/kshrc
+fi
+
+if [ -r /etc/environment ]; then
+    source /etc/environment
 fi
 
 typeset LC_ALL="C"
@@ -19,10 +23,6 @@ typeset -u HOSTNAME=$(hostname -s)
 typeset PRD=${PWD/$HOME\//}
 typeset TERM_TITLE=$(tty); TERM_TITLE=${TERM_TITLE##*/}
 typeset -x LC_ALL LANG SHELL OS HOSTNAME PRD TERM_TITLE
-
-# Read the OS environment
-#
-[ -r /etc/environment ] && . /etc/environment
 
 # Conditional PATH updates
 #
