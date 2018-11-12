@@ -1,0 +1,41 @@
+#!/bin/ksh
+#
+# inum: concatenate a file to STDOUT, prepending each line with its ordinal
+#
+# TODO: 
+# * implement argument processing with getopts()
+#   + argument list:
+#   + `-0` (default) enable zero-padding (+0 to disable (overrides -0))
+#   + `-n` disable all padding (e.g: zeroes of spaces; overrides "0" arg)
+#   + `-l` select line; may be specified more than once
+#     - e.g: `-l <line #> -l <line #>`
+#       selects two separate lines
+#   + `-r` select range of lines
+#     - e.g: `-r <starting line #>,<ending line #>`
+#       selects one contiguous range
+#     - e.g: `-r <starting line #>+<number lines>`
+#       selects <starting line> and <number lines> lines after
+#     - e.g: `-r <starting line #>-<number lines>`
+#      selects <number lines> preceding and up to <starting line>
+#   + `-q` quiet-mode; don't prepend line numbers, useful for line and range
+#     selections (overrides all padding arguments)
+# * clean up use of cat, &c 
+# * error handling, &c 
+#
+
+PATH=/bin:/usr/bin
+
+typeset LINES
+typeset -i count=0
+
+if [[ -r ${1} ]]; then
+    LINES=$(cat ${1} | wc -l)
+    
+    cat ${1} | while read -r line; do
+        (( ++count ))
+        printf "%0${#LINES}d: %s\n" ${count} "${line}"
+    done
+else
+    print -u2 "error: unable to read file ${1}"
+fi
+
