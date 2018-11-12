@@ -29,10 +29,16 @@ if [[ -r ~/.tasks ]]; then
 	fi
 fi
 
+# Update PATH for the Google Cloud SDK, if present
+if [ -f '/Users/tatti/bin/google-cloud-sdk/path.ksh.inc' ]; then
+   source '/Users/tatti/bin/google-cloud-sdk/path.ksh.inc'
+fi
+
 # HebCal
 if [[ -x /usr/local/bin/hebcal ]]; then
 	export HEBCAL_OPTS=' -T -r -o -s -S -Z -d -D -e -E -F -8 '
 	/usr/local/bin/hebcal
 fi
 
+# Prime the prompt via internal `cd` function
 cd
