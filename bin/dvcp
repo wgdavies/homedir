@@ -1,0 +1,10 @@
+#!/bin/ksh
+
+PATH=/bin:/usr/bin
+
+typeset OLDVOL=${1}
+typeset NEWVOL=${2}
+
+docker volume create ${NEWVOL}
+docker run --rm -it -v ${OLDVOL}:/from:ro -v ${NEWVOL}:/to:rw alpine ash -c "cd /from ; cp -av . /to"
+
