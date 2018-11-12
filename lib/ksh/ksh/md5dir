@@ -1,0 +1,20 @@
+function md5dir
+{
+    typeset _md5_dirname
+    typeset -i _md5_rcsv
+    
+    case ${1} in
+	-r) (( _md5_rcsv = 1 )); _md5_dirname=${2:-.} ;;
+	*) _md5_dirname=${1} ;;
+    esac
+
+    if (( _md5_rcsv == 1 )); then
+	find ${_md5_dirname} -type f -exec ${MD5} {} \;
+    else
+	if [[ -d ${_md5_dirname} ]]; then
+	    tar -cf - ${_md5_dirname} | ${MD5}
+	else
+	    print -u2 "md5dir error: ${_md5_dirname} does not exist or is not a directory"
+	fi
+    fi
+}
