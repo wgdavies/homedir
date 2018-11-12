@@ -20,6 +20,10 @@ typeset PRD=${PWD/$HOME\//}
 typeset TERM_TITLE=$(tty); TERM_TITLE=${TERM_TITLE##*/}
 typeset -x LC_ALL LANG SHELL OS HOSTNAME PRD TERM_TITLE
 
+# Read the OS environment
+#
+[ -r /etc/environment ] && . /etc/environment
+
 # Conditional PATH updates
 #
 [[ -d ~/bin ]] && PATH+=:~/bin
@@ -45,9 +49,7 @@ else
     print "WARNING: Operating System unknown"
 fi
 
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '/Users/tatti/bin/google-cloud-sdk/path.ksh.inc' ]; then source '/Users/tatti/bin/google-cloud-sdk/path.ksh.inc'; fi
-
+# Continued general aliases
 alias la='ls -a'
 alias lf='ls -F'
 alias ll='ls -l'
@@ -63,6 +65,7 @@ alias wn='printf "%(%W)T\n" now'
 alias sssh='pssh -i -t8 -x " -q"'
 alias ssssh='pssh -i -t8 -x " -q" -x " -tt"'
 
+# Colour aliases for prompts (e.g `cd` function command
 alias fgw='export COL_NORM=${COL_WHITE}'
 alias fgk='export COL_NORM=${COL_BLACK}'
 alias fgg='export COL_NORM=${COL_GREY}'
@@ -74,239 +77,26 @@ alias line='grep -n --colour'
 # Set up per-session histories
 #
 if test -t 0; then
-	if [[ ! -d ~/.local ]]; then
-		mkdir ~/.local
-	fi
-	
-	HISTFILE=~/.local/ksh-hist$(tty | tr / .)
-	touch ${HISTFILE}
+    if [[ ! -d ~/.local ]]; then
+	mkdir ~/.local
+    fi
+    
+    HISTFILE=~/.local/ksh-hist$(tty | tr / .)
+    touch ${HISTFILE}
 fi
 
-# Useful functions
+# Load user-defined functions/commands from library files
 #
-function .sh.math.sqr x
-{
-    (( .sh.value = (( x * x )) ))
-}
-
-function .sh.math.fac n
-{
-    typeset -li f=1 i
-
-    for (( i = 2 ; i <= n ; ++i )); do
-	(( f *= i ))
-    done
-
-    (( .sh.value = f ))
-}
-
-function awsput
-{
-    typeset _aws_key=${1}
-    typeset _aws_app=${2}
-    typeset _aws_des=${3}
-    
-    if [[ -z ${_aws_key} ]] || [[ ${_aws_key} == *(-)h*(elp) ]] \
-	   || [[ -z ${_aws_app} ]] || [[ -z ${_aws_des} ]]; then
-	print -u2 "usage: awsput <key> <app> <des>"
-	print -u2 "       where"
-	print -u2 "       <key> is application.zip ID (to be created by aws command)"
-	print -u2 "       <app> is CD ApplicationName (from Console)"
-	print -u2 "       <des> is application_Version_String (matches directory name_version)"
-    else
-	aws deploy push --application-name ${_aws_app} --s3-location s3://cashnet-codedeploy/${_aws_key} --source ./${_aws_des} --description ${_aws_des}
-    fi
-}
-
-function awsget
-{
-    typeset _aws_key=${1}
-    typeset _aws_ver=${2}
-    
-    if [[ -z ${_aws_key} ]] || [[ ${_aws_key} == *(-)h*(elp) ]] \
-	   || [[ -z ${_aws_ver} ]]; then
-	print -u2 "usage: awsget <key> <ver>"
-	print -u2 "       where"
-	print -u2 "       <key> is application.zip ID"
-	print -u2 "       <ver> is S3 versionId string"
-    else
-	aws s3api get-object --bucket cashnet-codedeploy --key ${_aws_key} --version-id ${_aws_ver} ./${_aws_key}
-    fi
-}
-
-function awslist
-{
-    typeset -a _aws_list=( $@ )
-    typeset -i _aws_idx=0
-    
-    if (( ${#_aws_list[@]} == 0 )) || [[ ${_aws_list[*]} =~ help ]]; then
-	print -u2 "usage: awslist <ApplicationName> <...>"
-    else
-	for (( _aws_idx = 0 ; _aws_idx < ${#_aws_list[@]} ; ++_aws_idx )); do
-	    aws deploy list-application-revisions --application-name ${_aws_list[$_aws_idx]} --sort-by registerTime --sort-order descending --max-items 1
-	done
-    fi
-}
-
-function wr
-{
-    typeset -a _wr_all=( ${@} )
-    typeset -a _wr_list
-    typeset -i _wr_len=0
-    typeset _wr_dir
-
-    if (( ${#_wr_all[@]} == 0 )); then
-	_wr_all=( "." )
-    fi
-    
-    for _wr_dir in ${_wr_all[@]}; do
-	if [[ -d ${_wr_dir} ]]; then
-	    _wr_list+=( ${_wr_dir} )
-	    if (( ${#_wr_dir} > _wr_len )); then
-		(( _wr_len = ${#_wr_dir} ))
-	    fi
-	else
-	    print -u2 "wr error: no such directory ${_wr_dir}"
+if [[ -d ~/lib/ksh ]]; then
+    for USERFUNC in ~/lib/ksh/*; do
+	if [[ -f ${USERFUNC} ]]; then
+	    source ${USERFUNC}
 	fi
     done
-    
-    for _wr_dir in ${_wr_list[@]}; do
-	printf "\n==== %-${_wr_len}s ====\n" ${_wr_dir}
-	( cd ${_wr_dir}; git remote -v 2>&1 | egrep -v '^(fatal|Stopping)' || print -u2 "NOTICE: not a Git repository")
-    done
-}
+fi
 
-function wb
-{
-    typeset -a _wb_all=( ${@} )
-    typeset -a _wb_list
-    typeset -i _wb_len=0
-    typeset _wb_dir
-    
-    if (( ${#_wb_all[@]} == 0 )); then
-	_wb_all=( "." )
-    fi
-    
-    for _wb_dir in ${_wb_all[@]}; do
-	if [[ -d ${_wb_dir} ]]; then
-	    _wb_list+=( ${_wb_dir} )
-	    if (( ${#_wb_dir} > _wb_len )); then
-		(( _wb_len = ${#_wb_dir} ))
-	    fi
-	else
-	    print -u2 "wb error: no such directory ${_wb_dir}"
-	fi
-
-        _wb_list=( "." )
-    done
-    
-    for _wb_dir in ${_wb_list[@]}; do
-        if (( ${#_wb_dir} > _wb_len )); then
-            (( _wb_len = ${#_wb_dir} ))
-        fi
-    done
-        
-    for _wb_dir in ${_wb_list[@]}; do
-        if [[ -d ${_wb_dir} ]]; then
-            printf "%-${_wb_len}s: " ${_wb_dir}
-            ( cd ${_wb_dir}; git branch -v 2>&1 | egrep '^\*' || print "NOTICE: not a Git repo" )
-        else
-            print -u2 "wb error: no such directory ${_wb_dir}"
-        fi
-    done
-    
-    for _wb_dir in ${_wb_list[@]}; do
-	printf "%-${_wb_len}s: " ${_wb_dir}
-	( cd ${_wb_dir}; git branch -v 2>&1 | egrep '^\*' || print -u2 "NOTICE: not a Git repository" )
-    done
-}
-
-function md5ign
-{
-    typeset _md5ign_file _md5ign_sign
-    
-    for _md5ign_file in ${@}; do
-	_md5ign_sign=$(egrep -v '#.*' ${_md5ign_file} | LC_ALL=C sort -bdf | tr -d '[:space:]' | ${MD5})
-	printf "%s %s\n" "${_md5ign_sign}" "${_md5ign_file}"
-    done
-}
-
-function md5dir
-{
-    typeset _md5_dirname
-    typeset -i _md5_rcsv
-    
-    case ${1} in
-	-r) (( _md5_rcsv = 1 )); _md5_dirname=${2:-.} ;;
-	*) _md5_dirname=${1} ;;
-    esac
-
-    if (( _md5_rcsv == 1 )); then
-	find ${_md5_dirname} -type f -exec ${MD5} {} \;
-    else
-	if [[ -d ${_md5_dirname} ]]; then
-	    tar -cf - ${_md5_dirname} | ${MD5}
-	else
-	    print -u2 "md5dir error: ${_md5_dirname} does not exist or is not a directory"
-	fi
-    fi
-}
-
-function man2pdf
-{
-    typeset -a _m2p_mans=( $@ )
-    typeset _m2p_manp
-
-    if (( ${#_m2p_mans[@]} > 0 )); then
-	for _m2p_manp in ${_m2p_mans[@]}; do
-	    man -t ${_m2p_manp} | ps2pdf - ${_m2p_manp}.pdf
-	done
-    else
-	print "specify one or more manpages for output to PDF"
-    fi
-}
-
-function enumerate
-{
-    typeset -i _en_linenum
-    typeset _en_line
-    typeset _en_readfile
-
-    for _en_readfile in $@; do
-	printf "::::::::\nEnumerating %s\n::::::::\n" ${_en_readfile}
-	_en_linenum=0
-	OLDIFS="$IFS"
-	IFS='\'
-
-	while read -r _en_line; do
-	    (( _en_linenum++ ))
-	    printf "%4d: %s\n" ${_en_linenum} "${_en_line}"
-	done < ${_en_readfile} | less
-	
-	IFS="$OLDIFS"
-    done
-}
-
-function where {
-    typeset _where_string=${1}
-    typeset -a _where_lines
-
-    if [[ -z $2 ]]; then
-	print "usage: where <string> <file(s)>"
-    else
-	printf "Searching for occurrences of %s...\n" ${_where_string}
-	for filename in ${@:2}; do
-	    if [[ -r ${filename} ]]; then
-		_where_lines=( $(grep -n ${_where_string} ${filename} | cut -d: -f1) )
-		
-		printf "%s: %d lines; %s\n" ${filename} $(wc -l < ${filename}) "${_where_lines[*]}"
-	    else
-		printf "error: unable to read file: %s\n" ${filename}
-	    fi
-	done
-    fi
-}
-
+# Begin functions and aliases for `cd` program/pretty prompts
+#
 function xdate {
     typeset _x_datestamp _x_datestring _x_datearg;
 
@@ -353,16 +143,6 @@ function oldxdate {
     print ${_ox_datestring}
 }
 
-function whatkey {
-    xev | \
-	grep -A2 --line-buffered '^KeyRelease' | \
-	sed -n '/keycode /s/^.*keycode \([0-9]*\).* (.*, \(.*\)).*$/\1 \2/p'
-}
-
-function git_id {
-    printf 'blob %s\0' "$(ls -l "$1" | awk '{print $5;}')" | cat - "$1" | sha1sum | awk '{print $1}'
-}
-
 # Now for lots of extra code to make pretty prompts
 export hosttype=""
 
@@ -401,6 +181,7 @@ case "${TERM}" in
 	    COL_NORM="${COL_DKGREY}"
 	fi
 	;;
+    *) print -u2 "WARNING: unknown terminal type ${TERM}; not setting prompt colours" ;;
 esac
 
 typeset hn="@${HOSTNAME}";
@@ -539,5 +320,6 @@ termtitle() {
 PS1='$(termtitle)${COL_NORM}[ ${INFOLINE} $(xdate) $(getdirstat) ]
 ${COL_NORM}$ ${COL_BLACK}'
 
-[ -r /etc/environment ] && . /etc/environment
+# The localenv file should exist and contain, at a minimum, the line:
+# cd
 [ -r ~/.localenv ] && . ~/.localenv
