@@ -1,0 +1,16 @@
+#!/bin/ksh
+
+printf "Continue? [y/n] "
+
+read YESNO
+
+case X${YESNO} in
+	XY*|Xy*)
+		continue
+	;;
+	*)
+		print -u2 "Stopping per user request."
+		exit 1
+	;;
+esac
+

@@ -171,7 +171,7 @@ function wr
     done
     
     for _wr_dir in ${_wr_list[@]}; do
-	printf "\n==== %${_wr_len}s ====\n" ${_wr_dir}
+	printf "\n==== %-${_wr_len}s ====\n" ${_wr_dir}
 	( cd ${_wr_dir}; git remote -v 2>&1 | egrep -v '^(fatal|Stopping)' || print -u2 "NOTICE: not a Git repository")
     done
 }
@@ -207,7 +207,16 @@ function wb
     done
         
     for _wb_dir in ${_wb_list[@]}; do
-	printf "%${_wb_len}s: " ${_wb_dir}
+        if [[ -d ${_wb_dir} ]]; then
+            printf "%-${_wb_len}s: " ${_wb_dir}
+            ( cd ${_wb_dir}; git branch -v 2>&1 | egrep '^\*' || print "NOTICE: not a Git repo" )
+        else
+            print -u2 "wb error: no such directory ${_wb_dir}"
+        fi
+    done
+    
+    for _wb_dir in ${_wb_list[@]}; do
+	printf "%-${_wb_len}s: " ${_wb_dir}
 	( cd ${_wb_dir}; git branch -v 2>&1 | egrep '^\*' || print -u2 "NOTICE: not a Git repository" )
     done
 }
