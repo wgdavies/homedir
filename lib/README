@@ -1,0 +1,2 @@
+# User-level library directory for local programs. 
+# By default, populated with a ksh/ directory for Korn Shell-related functions.
