@@ -308,11 +308,11 @@ getdirstat() {
 
 termtitle() {
     case ${TERM} in
-	eterm*)
-	    return
+	*xterm*)
+	    printf "\033]0;${TERM_TITLE}\007"
 	    ;;
 	*)
-	    printf "\033]0;${TERM_TITLE}\007"
+	    return
 	    ;;
     esac
 }
