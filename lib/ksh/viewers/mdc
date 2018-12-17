@@ -1,0 +1,6 @@
+# `cat` a Markdown-formatted file to STDOUT, preserving basic text formatting
+#
+function mdc {
+	pandoc ${1} | lynx -stdin -dump
+}
+
