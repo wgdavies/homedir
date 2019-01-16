@@ -1,0 +1,40 @@
+#!/bin/ksh
+
+PATH=/usr/local/bin:/usr/bin:/bin
+
+typeset -i verbose=0
+
+if [[ ${1} == -v ]]; then
+    (( verbose = 1 ))
+fi
+
+function vprint {
+    if (( verbose == 1 )); then
+        printf "cqmake: %s\n" "${@}"
+    fi
+}
+
+if [ ! -d ./.git ]; then
+    print -u2 "error: current directory does not appear to be a project root"
+    exit 1
+else
+    vprint "removing old CodeQuery files"
+    rm -f cscope.files cscope.out tags cq_${PWD##*/}.db
+    vprint "building source files list"
+    find . -iname "*.c"    > ./cscope.files
+    find . -iname "*.cpp" >> ./cscope.files
+    find . -iname "*.cxx" >> ./cscope.files
+    find . -iname "*.cc " >> ./cscope.files
+    find . -iname "*.h"   >> ./cscope.files
+    find . -iname "*.hpp" >> ./cscope.files
+    find . -iname "*.hxx" >> ./cscope.files
+    find . -iname "*.hh " >> ./cscope.files
+    vprint "creating CScope database"
+    cscope -cb # R
+    vprint "creating CTAGS database"
+    ctags --fields=+i -n -R -L ./cscope.files
+    vprint "building CodeQuery database"
+    cqmakedb -s ./cq_${PWD##*/}.db -c ./cscope.out -t ./tags -p
+    vprint "done! Run 'codequery' to view"
+fi
+
