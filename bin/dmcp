@@ -4,7 +4,7 @@ PATH=/bin:/usr/bin
 
 typeset PROGNAME="dmcp"
 typeset RWD=${PWD/-local}
-typeset -a filerr FILES=( ${@} )
+typeset -a filerr FILES=( ${@:2} )
 typeset -i errcount
 typeset filename CP CPF CPT
 
