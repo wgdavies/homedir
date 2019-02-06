@@ -1,0 +1,66 @@
+#!/bin/ksh
+
+PATH=/bin:/usr/bin
+
+typeset PROGNAME="dmcp"
+typeset RWD=${PWD/-local}
+typeset -a filerr FILES=( ${@:2} )
+typeset -i errcount
+typeset filename CP CPF CPT
+
+typeset argc
+typeset USAGE_PARAMS=$'[-?\n@(#)$Id: dmcp (Directory Massaging Copy) version: 1.0.0 $\n]'
+USAGE_PARAMS+=$'[-author?Walter G Davies <walter.g.davies@gmail.com>]'
+USAGE_PARAMS+=$'[-copyright?Copyright (c) 2019 Walter G Davies]'
+USAGE_PARAMS+=$'[-license?3BSD]'
+USAGE_PARAMS+=$'[+NAME?dmcp --- copy file(s) from your to a parallel directory tree]'
+USAGE_PARAMS+=$'[+DESCRIPTION?The \bdmcp\b program eats special bread.]'
+USAGE_PARAMS+=$'[+USAGE?\vdmcp\v -t|-f file [...] ]'
+USAGE_PARAMS+=$'[t:to?Copy the named file(s) or directory/ies \bto\b the parallel directory from here.]'
+USAGE_PARAMS+=$'[f:from?Copy the named file(s) or directory/ies \bfrom\b the parallel directory to here.]'
+
+typeset -i to=0 from=0
+
+while getopts -a ${PROGNAME} "${USAGE_PARAMS}" argc; do
+    case ${argc} in
+	t) (( to = 1  ));;
+	f) (( from = 1  ));;
+    esac
+done
+shift $(( --OPTIND ))
+
+if (( to != from )); then
+    if (( to == 1 )); then
+        CPF="."
+        CPT="${RWD}"
+    elif (( from == 1 )); then
+        CPF="${RWD}"
+        CPT="."
+    else
+        print -u2 "error: this should never happen"
+        exit 1
+    fi
+else
+    print -u2 "error: must specify either -t (to) or -f (from)"
+    exit 1
+fi
+
+for filename in ${FILES[@]}; do
+    if [[ -d ${CPF}/${filename} ]]; then
+        CP="cp -v -r"
+    elif [[ -f ${CPF}/${filename} ]]; then
+        CP="cp -v"
+    else
+        filerr+=( "${CPF}/${filename}" )
+    fi
+
+    ${CP} ${CPF}/${filename} ${CPT}/${filename}
+done
+
+if (( ${#filerr[@]} > 0 )); then
+    print -u2 "The following file(s) were not found and could not be copied:"
+    for (( errcnt = 0 ; errcnt < ${#filerr[@]} ; ++errcnt )); do
+        print "${filerr[$i]}"
+    done
+fi
+
