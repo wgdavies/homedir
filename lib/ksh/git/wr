@@ -7,18 +7,18 @@ function wr {
 
     if (( ${#_wr_all[@]} == 0 )); then
 	_wr_all=( "." )
-    else
-        for _wr_dir in ${_wr_all[@]}; do
-	    if [[ -d ${_wr_dir} ]]; then
-	        _wr_list+=( ${_wr_dir} )
-	        if (( ${#_wr_dir} > _wr_len )); then
-		    (( _wr_len = ${#_wr_dir} ))
-	        fi
-	    else
-	        print -u2 "wr error: no such directory ${_wr_dir}"
-	    fi
-        done
     fi
+
+    for _wr_dir in ${_wr_all[@]}; do
+	if [[ -d ${_wr_dir} ]]; then
+	    _wr_list+=( ${_wr_dir} )
+	    if (( ${#_wr_dir} > _wr_len )); then
+		(( _wr_len = ${#_wr_dir} ))
+	    fi
+	else
+	    print -u2 "wr error: no such directory ${_wr_dir}"
+	fi
+    done
 
     for _wr_dir in ${_wr_list[@]}; do
 	printf "\n==== %-${_wr_len}s ====\n" ${_wr_dir}
