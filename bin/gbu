@@ -74,7 +74,7 @@ if (( ${#dirlist[@]} > 0 )); then
 	    done
 	
 	git fetch --all
-	git pull --all
+	git pull --all --rebase
 	printf "Updated %d branches: %d new, %d already synch'd, %d errors\n" ${branches} ${newbranch} ${insynch} ${brancherr}
     done
 
@@ -82,3 +82,4 @@ if (( ${#dirlist[@]} > 0 )); then
 else
     print -u2 "NOTICE: no Git directories found under ${TLD}"
 fi
+
