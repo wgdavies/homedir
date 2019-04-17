@@ -7,18 +7,18 @@ function wb {
 
     if (( ${#_wb_all[@]} == 0 )); then
 	_wb_all=( "." )
-    else
-        for _wb_dir in ${_wb_all[@]}; do
-	    if [[ -d ${_wb_dir} ]]; then
-	        _wb_list+=( ${_wb_dir} )
-	        if (( ${#_wb_dir} > _wb_len )); then
-		    (( _wb_len = ${#_wb_dir} ))
-	        fi
-	    else
-	        print -u2 "wb error: no such directory ${_wb_dir}"
-	    fi
-        done
     fi
+
+    for _wb_dir in ${_wb_all[@]}; do
+	if [[ -d ${_wb_dir} ]]; then
+	    _wb_list+=( ${_wb_dir} )
+	    if (( ${#_wb_dir} > _wb_len )); then
+		(( _wb_len = ${#_wb_dir} ))
+	    fi
+	else
+	    print -u2 "wb error: no such directory ${_wb_dir}"
+	fi
+    done
 
     for _wb_dir in ${_wb_list[@]}; do
 	printf "%-${_wb_len}s: " ${_wb_dir}
