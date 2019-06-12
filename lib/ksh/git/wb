@@ -1,28 +1,36 @@
 # Function to show What Branch a Git repo (directory) is on
 function wb {
     typeset -a _wb_all=( ${@} )
-    typeset -a _wb_list
+    typeset -a _wb_list=()
     typeset -i _wb_len=0
-    typeset _wb_dir
+    typeset _wb_dir="" _wb_arg="-v"
 
     if (( ${#_wb_all[@]} == 0 )); then
-	_wb_all=( "." )
+        _wb_all=( "." )
+    elif [[ ${_wb_all[0]} == -a ]]; then
+        _wb_arg="-rv"
+
+        if (( ${#_wb_all[@]} == 1 )); then
+            _wb_all=( "." )
+        else
+            _wb_all=( ${_wb_all[@]:1} )
+        fi
     fi
 
     for _wb_dir in ${_wb_all[@]}; do
-	if [[ -d ${_wb_dir} ]]; then
-	    _wb_list+=( ${_wb_dir} )
-	    if (( ${#_wb_dir} > _wb_len )); then
-		(( _wb_len = ${#_wb_dir} ))
-	    fi
-	else
-	    print -u2 "wb error: no such directory ${_wb_dir}"
-	fi
+        if [[ -d ${_wb_dir} ]]; then
+            _wb_list+=( ${_wb_dir} )
+            if (( ${#_wb_dir} > _wb_len )); then
+                (( _wb_len = ${#_wb_dir} ))
+            fi
+        else
+            print -u2 "wb error: no such directory ${_wb_dir}"
+        fi
     done
 
     for _wb_dir in ${_wb_list[@]}; do
-	printf "%-${_wb_len}s: " ${_wb_dir}
-	( cd ${_wb_dir}; git branch -v 2>&1 | egrep '^\*' \
+        printf "%-${_wb_len}s: " ${_wb_dir}
+        ( cd ${_wb_dir}; git branch ${_wb_arg} 2>&1 | egrep '^\*' \
               || print -u2 "NOTICE: not a Git repository" )
     done
 }
