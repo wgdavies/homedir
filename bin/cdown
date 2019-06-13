@@ -1,0 +1,15 @@
+#!/bin/ksh
+
+typeset -i countdown=${1} count=0
+typeset rune=""
+
+if (( countdown > 0 )); then
+    for (( count = countdown ; count > 0 ; --count )); do
+        for rune in '/' '-' '\' '|'; do
+            printf " [%s] %d seconds remaining\t\t\r" "${rune}" ${count}
+            sleep 0.25
+        done
+    done
+else
+    print -u2 "usage: cdown [seconds]"
+fi
