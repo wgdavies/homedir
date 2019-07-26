@@ -16,6 +16,9 @@ else
             launchctl unload -w \
               /System/Library/LaunchDaemons/com.apple.metadata.mds.plist
               mdutil -a -i off
+            print "Also consider running:"
+            print -f 'sudo defaults write /.Spotlight-V100/VolumeConfiguration'
+            print ' Exclusions -array "/Volumes"'
             ;;
         *)
             print -u2 "usage: ${0} enable | disable"
