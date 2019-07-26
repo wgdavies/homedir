@@ -1,0 +1,25 @@
+#!/bin/ksh
+
+PATH=/bin:/usr/bin
+
+if (( $(id -u) != 0 )); then
+    print -u2 "error: must run ${0} with root permissions"
+    exit 1
+else
+    case ${1} in
+        enable|load)
+            launchctl load -w \
+              /System/Library/LaunchDaemons/com.apple.metadata.mds.plist
+              mdutil -a -i on
+            ;;
+        disable|unload)
+            launchctl unload -w \
+              /System/Library/LaunchDaemons/com.apple.metadata.mds.plist
+              mdutil -a -i off
+            ;;
+        *)
+            print -u2 "usage: ${0} enable | disable"
+            ;;
+    esac
+fi
+
