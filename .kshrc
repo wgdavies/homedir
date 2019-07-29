@@ -146,6 +146,7 @@ function oldxdate {
 # Now for lots of extra code to make pretty prompts
 export hosttype=""
 
+export COL_FG=""
 export COL_NORM=""
 export COL_BOLD=""
 export COL_UNBOLD=""
