@@ -146,6 +146,7 @@ function oldxdate {
 # Now for lots of extra code to make pretty prompts
 export hosttype=""
 
+export COL_FG=""
 export COL_NORM=""
 export COL_BOLD=""
 export COL_UNBOLD=""
@@ -162,27 +163,37 @@ typeset STATA
 
 typeset -i infocols=24 columns=$(tput cols)
 
-case "${TERM}" in
-    xterm*|vt100|screen|eterm-color)
-	if [[ -x $(type -p tput) ]]; then
-	    COL_BOLD="$(tput smso)"
-	    COL_UNBOLD="$(tput rmso)"
-	    COL_UBAR="$(tput smul)"
-	    COL_UNUBAR="$(tput rmul)"
-	    COL_BLACK="$(tput setaf 0)"
-	    COL_RED="$(tput setaf 1)"
-	    COL_GREEN="$(tput setaf 2)"
-	    COL_YELLOW="$(tput setaf 3)"
-	    COL_BLUE="$(tput setaf 4)"
-	    COL_GREY="$(tput setaf 6)"
-	    COL_LTGREY="$(tput setaf 7)"
-	    COL_DKGREY="$(tput setaf 8)"
-	    COL_WHITE="$(tput setaf 9)"
-	    COL_NORM="${COL_DKGREY}"
-	fi
-	;;
-    *) print -u2 "WARNING: unknown terminal type ${TERM}; not setting prompt colours" ;;
-esac
+if [[ -x $(type -p tput) ]]; then
+    COL_BOLD="$(tput smso)"
+    COL_UNBOLD="$(tput rmso)"
+    COL_UBAR="$(tput smul)"
+    COL_UNUBAR="$(tput rmul)"
+    COL_BLACK="$(tput setaf 0)"
+    COL_RED="$(tput setaf 1)"
+    COL_GREEN="$(tput setaf 2)"
+    COL_YELLOW="$(tput setaf 3)"
+    COL_BLUE="$(tput setaf 4)"
+    COL_GREY="$(tput setaf 6)"
+    COL_LTGREY="$(tput setaf 7)"
+    COL_DKGREY="$(tput setaf 8)"
+    COL_WHITE="$(tput setaf 9)"
+    COL_NORM="${COL_DKGREY}"
+    COL_FG="${COL_BLACK}"
+
+    case "${TERM}" in
+        xterm*|vt100|screen|eterm-color)
+    	    COL_NORM="${COL_DKGREY}"
+    	    COL_FG="${COL_BLACK}"
+    	;;
+        linux)
+    	    COL_NORM="${COL_LTGREY}"
+    	    COL_FG="${COL_WHITE}"
+    	;;
+        *) print -u2 "WARNING: unknown terminal type ${TERM}; not setting prompt colours" ;;
+    esac
+else
+        print -u2 "NOTICE: unable to run tput command; not setting prompt colours"
+fi
 
 typeset hn="@${HOSTNAME}";
 
@@ -318,7 +329,7 @@ termtitle() {
 }
 
 PS1='$(termtitle)${COL_NORM}[ ${INFOLINE} $(xdate) $(getdirstat) ]
-${COL_NORM}$ ${COL_BLACK}'
+${COL_NORM}$ ${COL_FG}'
 
 # The localenv file should exist and contain, at a minimum, the line:
 # cd
