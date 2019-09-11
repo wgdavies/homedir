@@ -80,7 +80,7 @@ if test -t 0; then
     if [[ ! -d ~/.local ]]; then
 	mkdir ~/.local
     fi
-    
+
     HISTFILE=~/.local/ksh-hist$(tty | tr / .)
     touch ${HISTFILE}
 fi
@@ -203,7 +203,7 @@ strata() {
 	    *) hosttype="Lo";;
 	esac
     fi
-    
+
     hosttype=${hosttype:-Un}
     print "${hosttype}"
 }
@@ -216,7 +216,7 @@ typeset BRANCH=""
 
 is_gitrepo() {
     typeset _is_grdir=${PWD}
-    
+
     while [[ ${_is_grdir} != "" ]]; do
 	[[ -d ${_is_grdir}/.git ]] && exit 0
 	_is_grdir=${_is_grdir%/*}
@@ -230,7 +230,7 @@ typeset -a VCSINFO=( )
 cd() {
     typeset _cd_gs _cd_cwd _vcc _vccpref _vccpost
     typeset -i _cd_gi
-    
+
     if [[ ${1} == -d ]]; then
 	if [[ -d ${2} ]]; then
 	    print -u2 "directory ${2} exists"
@@ -238,18 +238,18 @@ cd() {
 	    mkdir "${2}"
 	    print -u2 "created directory ${2}"
 	fi
-	
+
 	command cd "${2}"
     else
 	command cd "${@}"
     fi
-    
+
     columns=$(tput cols)
     PRD=${PWD/$HOME\//}
-    
+
     if [[ -r ./.svn/all-wcprops ]]; then
 	VCSINFO=( $(sed -n 's/^\/svn\/repos\///g;s/\/\!/ /g;s/svn\/ver\///g;s/\([0-9]*\)\//\1:\//p' ./.svn/all-wcprops) )
-	
+
 	if (( ${#VCSINFO[@]} < 2 )); then
 	    CURRDIR="$(printf "%sSVN%s %s%s" "${COL_BLUE}" "${COL_GREEN}" "${PWD##*/}" "${COL_NORM}")"
 	else
@@ -261,8 +261,8 @@ cd() {
 	_vccpref=${_vcc#git@}
 	_vccpost=${_vcc##*/}
 	VCSINFO=( ${_vccpref%%/*} ${_vccpost%.git} )
-	
-	if (( ${#VCSINFO[@]} < 2 )); then	    
+
+	if (( ${#VCSINFO[@]} < 2 )); then
 	    CURRDIR="$(printf "%sGit %s%s%s" "${COL_BLUE}" "${COL_YELLOW}" "${PWD##*/}" "${COL_NORM}")"
 	else
 	    BRANCH=$(git symbolic-ref HEAD)
@@ -270,17 +270,17 @@ cd() {
 	    _cd_gs="$(git status 2>&1)"
 	    _cd_cwd="$(print ${PWD#$HOME/code} | tr -d "[:alnum:]_.-")${PWD##*/}"
 	    _cd_gi=$(egrep -c -v '^#' $(git rev-parse --show-toplevel)/.git/info/exclude)
-	    
+
 	    case ${VCSINFO[0]} in
 		'ssh:'|'http:'|'https:')
 		    VCSINFO[0]=${VCSINFO[0]/:}
 		    ;;
 	    esac
-	    
+
 	    if (( _cd_gi > 0 )); then
 		_cd_cwd="!!${_cd_cwd}"
 	    fi
-	    
+
 	    if [[ "${_cd_gs}" =~ "unmerged paths" ]]; then
 		BRANCH+='|MERGING'
 		SLINE="${COL_GREEN}${_cd_cwd}${COL_NORM}"
@@ -296,14 +296,14 @@ cd() {
 	    else
 		SLINE="${COL_WHITE}${_cd_cwd}${COL_NORM}"
 	    fi
-	    
+
 	    CURRDIR="$(printf "%sGit %s %s%s:%s \"%s\"" "${COL_BLUE}" ${VCSINFO[0]} "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${BRANCH}")"
 	fi
     else
 	VCSINFO=( 0 0 )
 	_cd_cwd=${PWD/$HOME/\~}
 	CURRDIR="${COL_GREEN}$(print ${_cd_cwd} | tr -d "[:alnum:]_.-")${PWD##*/}${COL_NORM}"
-    fi    
+    fi
 
     if (( infocols + ${#CURRDIR} > columns )); then
 	INFOLINE="${COL_BOLD}${STRATA}${COL_UNBOLD}"
