@@ -40,5 +40,7 @@ if [[ -x /usr/local/bin/hebcal ]]; then
 	/usr/local/bin/hebcal
 fi
 
+tabs -4
+
 # Prime the prompt via internal `cd` function
 cd
