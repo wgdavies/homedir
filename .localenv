@@ -6,6 +6,8 @@
 [ -d /opt/node ] && export NODE=/opt/node && PATH=${PATH}:${NODE}/bin
 [ -d ~/bin ] && PATH=${PATH}:~/bin
 [ -f ~/.localhosts ] && source ~/.localhosts
+export GOPATH=~/code/go
+PATH+=:${GOPATH}/bin
 
 export SVN_EDITOR=jove
 
@@ -19,20 +21,20 @@ if [[ ! $(typeset -r) =~ HIST ]]; then
 	touch ${HISTFILE}
 fi
 
-if [[ -r ~/.tasks ]]; then
-	print "Current projects / tasks:"
-	
-	if [[ -s ~/.tasks ]]; then
-		cat ~/.tasks
-	else
-		print "None... find something to do!"
-	fi
-fi
+#if [[ -r ~/.tasks ]]; then
+#	print "Current projects / tasks:"
+#	
+#	if [[ -s ~/.tasks ]]; then
+#		cat ~/.tasks
+#	else
+#		print "None... find something to do!"
+#	fi
+#fi
 
 # Update PATH for the Google Cloud SDK, if present
-if [ -f '/Users/tatti/bin/google-cloud-sdk/path.ksh.inc' ]; then
-   source '/Users/tatti/bin/google-cloud-sdk/path.ksh.inc'
-fi
+#if [ -f '/Users/tatti/bin/google-cloud-sdk/path.ksh.inc' ]; then
+#   source '/Users/tatti/bin/google-cloud-sdk/path.ksh.inc'
+#fi
 
 # HebCal
 if [[ -x /usr/local/bin/hebcal ]]; then
@@ -44,3 +46,4 @@ tabs -4
 
 # Prime the prompt via internal `cd` function
 cd
+
