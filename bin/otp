@@ -21,7 +21,7 @@ done
 printf "\n%7d letters" ${target}
 printf "\n%7d iterations" ${it}
 printf "\n%7.3f rounds per letter" $(( ${it}.0 / ${target}.0 ))
-printf "\n%7.5f efficiency ratio\n" $(( ${target}.0 / ${it}.0 ))
+printf "\n%6d%% efficiency ratio\n" $(( (( ${target}.0 / ${it}.0 )) * 100 ))
 
 ## NOTES
 # https://en.wikipedia.org/wiki/ASCII
