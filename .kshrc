@@ -16,13 +16,14 @@ if [ -r /etc/environment ]; then
 fi
 
 typeset LC_ALL="C"
+typeset LC_TIME="POSIX"
 typeset LANG="en_GB.UTF-8"
 typeset SHELL="/bin/ksh"
 typeset OS=$(uname -s)
 typeset -u HOSTNAME=$(hostname -s)
 typeset PRD=${PWD/$HOME\//}
 typeset TERM_TITLE=$(tty); TERM_TITLE=${TERM_TITLE##*/}
-typeset -x LC_ALL LANG SHELL OS HOSTNAME PRD TERM_TITLE
+typeset -x LC_ALL LC_TIME LANG SHELL OS HOSTNAME PRD TERM_TITLE
 
 # Conditional PATH updates
 #
