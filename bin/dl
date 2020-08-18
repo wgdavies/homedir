@@ -47,14 +47,13 @@ function opendl {
 }
 
 if [[ -z ${EDITOR} ]]; then
-    (( ++rec ))
-
     for editor in ${EDITOR_LIST[@]}; do
         if EDITOR=$(which ${editor}); then
-        break
+            break
+        fi
     done
 
-    if (( rec > 0 )); then
+    if [[ ! -x ${EDITOR} ]]; then
         print -u2 "error: unable to determine editor"
         exit 3
     fi
