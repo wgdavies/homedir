@@ -1,0 +1,48 @@
+#!/bin/ksh
+
+EDITOR=${EDITOR:-vi}
+typeset DLD=~/TODOs
+typeset DLF="$(printf '%(%Y%m%d)T' now).todos"
+typeset DLP="${DLD}/${DLF}"
+typeset OLD=""
+typeset -i rec=0
+
+function popold {
+    typeset -a dla=( $(ls ${DLD}/*.todos) )
+
+    (( ++rec ))
+
+    if (( ${#dla[@]} > 0 )); then
+        OLD=${dla[@]: -1}
+        printf "* \n\n==== %s\n" ${OLD}
+        print -r "$(<${OLD})" >> ${DLP}
+    else
+        print -u2 "error: not finding TODO lists; check configuration"
+        exit 2
+    fi
+}
+
+function opendl {
+    if (( rec > 1 )); then
+        print -u2 "error: loop detected; check configuration"
+        exit 3
+    fi
+
+    if [[ -d ${DLD} ]]; then
+        if [[ -w ${DLP} ]]; then
+            ${EDITOR} ${DLP}
+        elif [[ -e ${DLP} ]] && [[ ! -w ${DLP} ]]; then
+            print -u2 "error: ${DLP} exists but is not writeable"
+            exit 1
+        else
+            popold
+            opendl
+        fi
+    else
+        print -u2 "error: ${DLD} path not found"
+        exit 1
+    fi
+}
+
+opendl
+
