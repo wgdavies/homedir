@@ -16,7 +16,7 @@ function popold {
 
     if (( ${#dla[@]} > 0 )); then
         OLD=${dla[@]: -1}
-        printf "* \n\n==== %s\n" ${OLD}
+        printf "* \n\n==== %s\n" ${OLD##*/} > ${DLP}
         print -r "$(<${OLD})" >> ${DLP}
     else
         print -u2 "error: not finding TODO lists; check configuration"
@@ -60,4 +60,3 @@ if [[ -z ${EDITOR} ]]; then
 fi
 
 opendl
-
