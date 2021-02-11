@@ -2,8 +2,8 @@
 #
 [ -x /usr/bin/go ] && export GOROOT=/usr
 [ -x /usr/local/bin/go ] && export GOROOT=/usr/local
-[ -d /opt/go ] && export GOROOT=/opt/go && PATH=${PATH}:${GOROOT}/bin
-[ -d /opt/node ] && export NODE=/opt/node && PATH=${PATH}:${NODE}/bin
+[ -d /opt/go ] && export GOROOT=/opt/go
+[ -s ${GOROOT} ] && PATH=${PATH}:${GOROOT}/bin
 [ -d ~/bin ] && PATH=${PATH}:~/bin
 [ -f ~/.localhosts ] && source ~/.localhosts
 export GOPATH=~/code/go

@@ -1,0 +1,2 @@
+# Cross-compile Go binaries for Linux/x86_64
+alias xgo='env GOOS=linux GOARCH=amd64 go build -v'
