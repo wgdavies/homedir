@@ -4,13 +4,13 @@ PATH=/bin:/usr/bin:/usr/local/bin:~/bin
 
 typeset -a EDITOR_LIST=( gemacs vi ${EDITOR} )
 typeset DLD=~/TODOs
-typeset DLF="$(printf '%(%Y%m%d)T' now).todos"
+typeset DLF="$(printf '%(%Y%m%d)T' now).md"
 typeset DLP="${DLD}/${DLF}"
 typeset OLD=""
 typeset -i rec=0
 
 function popold {
-    typeset -a dla=( $(ls ${DLD}/*.todos) )
+    typeset -a dla=( $(ls ${DLD}/*.md) )
 
     (( ++rec ))
 
