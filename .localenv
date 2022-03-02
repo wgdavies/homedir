@@ -21,29 +21,18 @@ if [[ ! $(typeset -r) =~ HIST ]]; then
 	touch ${HISTFILE}
 fi
 
-#if [[ -r ~/.tasks ]]; then
-#	print "Current projects / tasks:"
-#	
-#	if [[ -s ~/.tasks ]]; then
-#		cat ~/.tasks
-#	else
-#		print "None... find something to do!"
-#	fi
-#fi
-
-# Update PATH for the Google Cloud SDK, if present
-#if [ -f '/Users/tatti/bin/google-cloud-sdk/path.ksh.inc' ]; then
-#   source '/Users/tatti/bin/google-cloud-sdk/path.ksh.inc'
-#fi
-
 # HebCal
 if [[ -x /usr/local/bin/hebcal ]]; then
 	export HEBCAL_OPTS=' -T -r -o -s -S -Z -d -D -e -E -F -8 '
 	/usr/local/bin/hebcal
 fi
 
+# Set the tabstop to 4 on output.
 tabs -4
 
-# Prime the prompt via internal `cd` function
+# Set the default Git upstream interval check to one hour.
+CD_CHECK=3600
+
+# Prime the prompt via internal `cd` function.
 cd
 
