@@ -50,6 +50,12 @@ else
     print "WARNING: Operating System unknown"
 fi
 
+# Variables that determine whether and how often a Git upstream is checked.
+#
+typeset -i CD_CHECK
+typeset CD_FILE=~/.gitconfig
+typeset -x CD_CHECK CD_FILE
+
 # Continued general aliases
 alias la='ls -a'
 alias lf='ls -F'
@@ -61,8 +67,6 @@ alias lt='ls -t'
 alias llt='ls -lcr'
 alias lrt='ls -lctr'
 alias cdb='cd $OLDPWD'
-alias cdt='cd ${PWD%/trunk/*}/trunk'
-alias tl='jove ~/.tasks'
 alias pwe='openssl enc -aes-256-cbc -salt -in ~/.pw.txt -out ~/.pw.enc && rm ~/.pw.txt'
 alias pwc='openssl enc -aes-256-cbc -d -in ~/.pw.enc -out ~/.pw.txt'
 alias wn='printf "%(%W)T\n" now'
@@ -82,7 +86,7 @@ alias line='grep -n --colour'
 #
 if test -t 0; then
     if [[ ! -d ~/.local ]]; then
-	mkdir ~/.local
+        mkdir ~/.local
     fi
 
     HISTFILE=~/.local/ksh-hist$(tty | tr / .)
@@ -93,9 +97,9 @@ fi
 #
 if [[ -d ~/lib/ksh ]]; then
     for USERFUNC in ~/lib/ksh/*; do
-	if [[ -f ${USERFUNC} ]]; then
-	    source ${USERFUNC}
-	fi
+        if [[ -f ${USERFUNC} ]]; then
+            source ${USERFUNC}
+        fi
     done
 fi
 
@@ -105,20 +109,20 @@ function xdate {
     typeset _x_datestamp _x_datestring _x_datearg;
 
     if (( ${#} > 0 )); then
-	for _x_datearg in ${@}; do
-	    if [[ ${_x_datearg} =~ [0-9,a-f,A-F] ]]; then
-		if [[ ${_x_datearg} =~ 0x ]]; then
-		    _x_datestamp=$(printf "%d" ${_x_datearg})
-		else
-		    _x_datestamp=$(printf "%d" 0x${_x_datearg})
-		fi
-		_x_datestring=$(printf '%(%FT%T)T' '#'${_x_datestamp})
-	    else
-		_x_datestring=$(printf "%X" ${1})
-	    fi
-	done
+        for _x_datearg in ${@}; do
+            if [[ ${_x_datearg} =~ [0-9,a-f,A-F] ]]; then
+                if [[ ${_x_datearg} =~ 0x ]]; then
+                    _x_datestamp=$(printf "%d" ${_x_datearg})
+                else
+                    _x_datestamp=$(printf "%d" 0x${_x_datearg})
+                fi
+                _x_datestring=$(printf '%(%FT%T)T' '#'${_x_datestamp})
+            else
+                _x_datestring=$(printf "%X" ${1})
+            fi
+        done
     else
-	_x_datestring=$(printf "%X" $(printf '%(%s)T' now))
+        _x_datestring=$(printf "%X" $(printf '%(%s)T' now))
     fi
 
     print ${_x_datestring}
@@ -128,20 +132,20 @@ function oldxdate {
     typeset _ox_datestamp _ox_datestring _ox_datearg;
 
     if (( $# > 0 )); then
-	for _ox_datearg in $@; do
-	    if [[ ${_ox_datearg} =~ [0-9,a-f,A-F] ]]; then
-		if [[ ${_ox_datearg} =~ 0x ]]; then
-		    _ox_datestamp=$(printf "%d" ${_ox_datearg})
-		else
-		    _ox_datestamp=$(printf "%d" 0x${_ox_datearg})
-		fi
-		_ox_datestring=$(print ${_ox_datestamp} | sed -e 's/\(....\)\(..\)\(..\)\(..\)\(..\)\(..\)/\1-\2-\3T\4:\5:\6/g')
-	    else
-		_ox_datestring=$(printf "%X" $1)
-	    fi
-	done
+        for _ox_datearg in $@; do
+            if [[ ${_ox_datearg} =~ [0-9,a-f,A-F] ]]; then
+                if [[ ${_ox_datearg} =~ 0x ]]; then
+                    _ox_datestamp=$(printf "%d" ${_ox_datearg})
+                else
+                    _ox_datestamp=$(printf "%d" 0x${_ox_datearg})
+                fi
+                _ox_datestring=$(print ${_ox_datestamp} | sed -e 's/\(....\)\(..\)\(..\)\(..\)\(..\)\(..\)/\1-\2-\3T\4:\5:\6/g')
+            else
+                _ox_datestring=$(printf "%X" $1)
+            fi
+        done
     else
-	_ox_datestring=$(printf "%X" $(date +"%Y%m%d%H%M%S"))
+        _ox_datestring=$(printf "%X" $(date +"%Y%m%d%H%M%S"))
     fi
 
     print ${_ox_datestring}
@@ -186,26 +190,26 @@ if [[ -x $(type -p tput) ]]; then
 
     case "${TERM}" in
         xterm*|vt100|screen|eterm-color)
-    	    COL_NORM="${COL_DKGREY}"
-    	    COL_FG="${COL_BLACK}"
-    	;;
+            COL_NORM="${COL_DKGREY}"
+            COL_FG="${COL_BLACK}"
+            ;;
         linux)
-    	    COL_NORM="${COL_LTGREY}"
-    	    COL_FG="${COL_WHITE}"
-    	;;
+            COL_NORM="${COL_LTGREY}"
+            COL_FG="${COL_WHITE}"
+            ;;
         *) print -u2 "WARNING: unknown terminal type ${TERM}; not setting prompt colours" ;;
     esac
 else
-        print -u2 "NOTICE: unable to run tput command; not setting prompt colours"
+    print -u2 "NOTICE: unable to run tput command; not setting prompt colours"
 fi
 
 typeset hn="@${HOSTNAME}";
 
 strata() {
     if [[ -z ${hosttype} ]]; then
-	case ${HOSTNAME} in
-	    *) hosttype="Lo";;
-	esac
+        case ${HOSTNAME} in
+            *) hosttype="Lo";;
+        esac
     fi
 
     hosttype=${hosttype:-Un}
@@ -222,11 +226,26 @@ is_gitrepo() {
     typeset _is_grdir=${PWD}
 
     while [[ ${_is_grdir} != "" ]]; do
-	[[ -d ${_is_grdir}/.git ]] && exit 0
-	_is_grdir=${_is_grdir%/*}
+        [[ -d ${_is_grdir}/.git ]] && exit 0
+        _is_grdir=${_is_grdir%/*}
     done
 
     exit 1
+}
+
+cd_checkupstream() {
+    typeset -i _cd_file_time=$(stat -f "%m" ${CD_FILE})
+    typeset -i _cd_time=$(printf "%(%s)T" now)
+
+    if (( CD_CHECK > 0 )) && (( (( _cd_time - _cd_file_time )) > CD_CHECK )); then
+        if git remote show origin | egrep -q 'out of date|next fetch will store'; then
+            print 1
+        else
+            print 0
+        fi
+
+        touch ${CD_FILE}
+    fi
 }
 
 typeset -a VCSINFO=( )
@@ -236,83 +255,87 @@ cd() {
     typeset -i _cd_gi
 
     if [[ ${1} == -d ]]; then
-	if [[ -d ${2} ]]; then
-	    print -u2 "directory ${2} exists"
-	else
-	    mkdir "${2}"
-	    print -u2 "created directory ${2}"
-	fi
+        if [[ -d ${2} ]]; then
+            print -u2 "directory ${2} exists"
+        else
+            mkdir "${2}"
+            print -u2 "created directory ${2}"
+        fi
 
-	command cd "${2}"
+        command cd "${2}"
     else
-	command cd "${@}"
+        command cd "${@}"
     fi
 
     columns=$(tput cols)
     PRD=${PWD/$HOME\//}
 
     if [[ -r ./.svn/all-wcprops ]]; then
-	VCSINFO=( $(sed -n 's/^\/svn\/repos\///g;s/\/\!/ /g;s/svn\/ver\///g;s/\([0-9]*\)\//\1:\//p' ./.svn/all-wcprops) )
+        VCSINFO=( $(sed -n 's/^\/svn\/repos\///g;s/\/\!/ /g;s/svn\/ver\///g;s/\([0-9]*\)\//\1:\//p' ./.svn/all-wcprops) )
 
-	if (( ${#VCSINFO[@]} < 2 )); then
-	    CURRDIR="$(printf "%sSVN%s %s%s" "${COL_BLUE}" "${COL_GREEN}" "${PWD##*/}" "${COL_NORM}")"
-	else
-	    CURRDIR="$(printf "%s%s %sSVN v.%s%s" "${COL_BLUE}" ${VCSINFO[0]} "${COL_GREEN}" ${VCSINFO[1]} "${COL_NORM}")"
-	fi
+        if (( ${#VCSINFO[@]} < 2 )); then
+            CURRDIR="$(printf "%sSVN%s %s%s" "${COL_BLUE}" "${COL_GREEN}" "${PWD##*/}" "${COL_NORM}")"
+        else
+            CURRDIR="$(printf "%s%s %sSVN v.%s%s" "${COL_BLUE}" ${VCSINFO[0]} "${COL_GREEN}" ${VCSINFO[1]} "${COL_NORM}")"
+        fi
     elif $(is_gitrepo); then
-	_vcc=$(git config remote.origin.url)
-	_vccpref=${_vcc#http*\/\/}
-	_vccpref=${_vcc#git@}
-	_vccpost=${_vcc##*/}
-	VCSINFO=( ${_vccpref%%/*} ${_vccpost%.git} )
+        _vcc=$(git config remote.origin.url)
+        _vccpref=${_vcc#http*\/\/}
+        _vccpref=${_vcc#git@}
+        _vccpost=${_vcc##*/}
+        VCSINFO=( ${_vccpref%%/*} ${_vccpost%.git} )
 
-	if (( ${#VCSINFO[@]} < 2 )); then
-	    CURRDIR="$(printf "%sGit %s%s%s" "${COL_BLUE}" "${COL_YELLOW}" "${PWD##*/}" "${COL_NORM}")"
-	else
-	    BRANCH=$(git symbolic-ref HEAD)
-	    BRANCH=${BRANCH:##*/}
-	    _cd_gs="$(git status 2>&1)"
-	    _cd_cwd="$(print ${PWD#$HOME/code} | tr -d "[:alnum:]_.-")${PWD##*/}"
-	    _cd_gi=$(egrep -c -v '^#' $(git rev-parse --show-toplevel)/.git/info/exclude)
+        if (( ${#VCSINFO[@]} < 2 )); then
+            CURRDIR="$(printf "%sGit %s%s%s" "${COL_BLUE}" "${COL_YELLOW}" "${PWD##*/}" "${COL_NORM}")"
+        else
+            BRANCH=$(git symbolic-ref HEAD)
+            BRANCH=${BRANCH:##*/}
+            _cd_gs="$(git status 2>&1)"
+            _cd_cwd="$(print ${PWD#$HOME/code} | tr -d "[:alnum:]_.-")${PWD##*/}"
+            _cd_gi=$(egrep -c -v '^#' $(git rev-parse --show-toplevel)/.git/info/exclude)
+            _cd_gu=$(cd_checkupstream)
 
-	    case ${VCSINFO[0]} in
-		'ssh:'|'http:'|'https:')
-		    VCSINFO[0]=${VCSINFO[0]/:}
-		    ;;
-	    esac
+            case ${VCSINFO[0]} in
+                'ssh:'|'http:'|'https:')
+                    VCSINFO[0]=${VCSINFO[0]/:}
+                    ;;
+            esac
 
-	    if (( _cd_gi > 0 )); then
-		_cd_cwd="!!${_cd_cwd}"
-	    fi
+            if (( _cd_gi > 0 )); then
+                _cd_cwd="!!${_cd_cwd}"
+            fi
 
-	    if [[ "${_cd_gs}" =~ "unmerged paths" ]]; then
-		BRANCH+='|MERGING'
-		SLINE="${COL_GREEN}${_cd_cwd}${COL_NORM}"
-	    elif [[ "${_cd_gs}" =~ "have diverged" ]]; then
-		BRANCH+='|DIVERGENT'
-		SLINE="${COL_YELLOW}${COL_UBAR}${_cd_cwd}${COL_UNUBAR}${COL_NORM}"
-	    elif [[ "${_cd_gs}" =~ "modified" ]] || [[ "${_cd_gs}" =~ "Changes to be committed" ]]; then
-		SLINE="${COL_RED}${COL_BOLD}${_cd_cwd}${COL_UNBOLD}${COL_NORM}"
-	    elif [[ "${_cd_gs}" =~ "Your branch is ahead" ]]; then
-		SLINE="${COL_YELLOW}${COL_BOLD}${_cd_cwd}${COL_UNBOLD}${COL_NORM}"
-	    elif [[ "${_cd_gs}" =~ "Untracked files" ]]; then
-		SLINE="${COL_UBAR}${_cd_cwd}${COL_UNUBAR}${COL_NORM}"
-	    else
-		SLINE="${COL_WHITE}${_cd_cwd}${COL_NORM}"
-	    fi
+            if [[ "${_cd_gs}" =~ "unmerged paths" ]]; then
+                BRANCH+='|MERGING'
+                SLINE="${COL_GREEN}${_cd_cwd}${COL_NORM}"
+            elif [[ "${_cd_gs}" =~ "have diverged" ]]; then
+                BRANCH+='|DIVERGENT'
+                SLINE="${COL_YELLOW}${COL_UBAR}${_cd_cwd}${COL_UNUBAR}${COL_NORM}"
+            elif [[ "${_cd_gs}" =~ "modified" ]] || [[ "${_cd_gs}" =~ "Changes to be committed" ]]; then
+                SLINE="${COL_RED}${COL_BOLD}${_cd_cwd}${COL_UNBOLD}${COL_NORM}"
+            elif [[ "${_cd_gs}" =~ "Your branch is ahead" ]]; then
+                SLINE="${COL_YELLOW}${COL_BOLD}${_cd_cwd}${COL_UNBOLD}${COL_NORM}"
+            elif [[ "${_cd_gs}" =~ "Untracked files" ]]; then
+                SLINE="${COL_UBAR}${_cd_cwd}${COL_UNUBAR}${COL_NORM}"
+            elif (( _cd_gu != 0 )); then
+                BRANCH+="|BEHIND"
+                SLINE="${COL_RED=}${COL_UBAR}${_cd_cwd}${COL_UNUBAR}${COL_NORM}"
+            else
+                SLINE="${COL_WHITE}${_cd_cwd}${COL_NORM}"
+            fi
 
-	    CURRDIR="$(printf "%sGit %s %s%s:%s \"%s\"" "${COL_BLUE}" ${VCSINFO[0]} "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${BRANCH}")"
-	fi
+            CURRDIR="$(printf "%sGit %s %s%s:%s \"%s\"" "${COL_BLUE}" ${VCSINFO[0]} "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${BRANCH}")"
+        fi
     else
-	VCSINFO=( 0 0 )
-	_cd_cwd=${PWD/$HOME/\~}
-	CURRDIR="${COL_GREEN}$(print ${_cd_cwd} | tr -d "[:alnum:]_.-")${PWD##*/}${COL_NORM}"
+        VCSINFO=( 0 0 )
+        _cd_cwd=${PWD/$HOME/\~}
+        CURRDIR="${COL_GREEN}$(print ${_cd_cwd} | tr -d "[:alnum:]_.-")${PWD##*/}${COL_NORM}"
     fi
 
     if (( infocols + ${#CURRDIR} > columns )); then
-	INFOLINE="${COL_BOLD}${STRATA}${COL_UNBOLD}"
+        INFOLINE="${COL_BOLD}${STRATA}${COL_UNBOLD}"
     else
-	INFOLINE="${WHOWHERE} ${COL_BOLD}${STRATA}${COL_UNBOLD}"
+        INFOLINE="${WHOWHERE} ${COL_BOLD}${STRATA}${COL_UNBOLD}"
     fi
 }
 
@@ -323,12 +346,12 @@ getdirstat() {
 
 termtitle() {
     case ${TERM} in
-	*xterm*)
-	    printf "\033]0;${TERM_TITLE}\007"
-	    ;;
-	*)
-	    return
-	    ;;
+        *xterm*)
+            printf "\033]0;${TERM_TITLE}\007"
+            ;;
+        *)
+            return
+            ;;
     esac
 }
 
