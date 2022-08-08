@@ -28,8 +28,8 @@ typeset -x LC_ALL LC_TIME LANG SHELL OS HOSTNAME PRD TERM_TITLE
 # Conditional PATH updates
 #
 [[ -d ~/bin ]] && PATH+=:~/bin
-[[ -d /usr/local ]] && PATH+=${PATH}:/usr/local/bin:/usr/local/sbin
-[[ -d /usr/local/opt/gettext/bin ]] && PATH+="/usr/local/opt/gettext/bin:$PATH"
+[[ -d /usr/local ]] && PATH+=:/usr/local/bin:/usr/local/sbin
+[[ -d /usr/local/opt/gettext/bin ]] && PATH+=:/usr/local/opt/gettext/bin
 
 # User specific aliases and functions
 #

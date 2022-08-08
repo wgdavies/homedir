@@ -1,38 +1,44 @@
-# Local modifications particular to this host
-#
-[ -x /usr/bin/go ] && export GOROOT=/usr
-[ -x /usr/local/bin/go ] && export GOROOT=/usr/local
-[ -d /opt/go ] && export GOROOT=/opt/go
-[ -s ${GOROOT} ] && PATH=${PATH}:${GOROOT}/bin
-[ -d ~/bin ] && PATH=${PATH}:~/bin
-[ -f ~/.localhosts ] && source ~/.localhosts
-export GOPATH=~/code/go
-PATH+=:${GOPATH}/bin
+## Local modifications particular to this host
 
-export SVN_EDITOR=jove
+# Homebrew-managed Go environment
+[ -x /opt/homebrew/bin/go ] && export GOROOT=/opt/homebrew/Cellar/go/1.19/libexec
+[ -s ${GOROOT} ] && PATH+=:${GOROOT}/bin
+export GOPATH=~/code/go:${GOROOT}
 
-#typeset -i snum=$(tty | sed 's;.*/;;')
-typeset -i snum=$(w | egrep -c "^$(whoami)")
+# Updates to PATH variable for Go, &c
+typeset -a BINPATHS=(
+    /opt/homebrew/bin
+    ~/bin
+    ~/code/bin
+    ~/code/go/bin
+)
+for binpath in ${BINPATHS[@]}; do
+    [ -d ${binpath} ] && PATH+=:${binpath}
+done
+
+typeset mytty=$(/usr/bin/tty)
 
 if [[ ! $(typeset -r) =~ HIST ]]; then
-	export HISTSIZE=32767
-	export HISTFILE=~/.hist.${snum}
+    export HISTSIZE=32767
+    export HISTFILE=~/.hist.${mytty##*/}
 	
-	touch ${HISTFILE}
+    touch ${HISTFILE}
 fi
+
+# AWS CLI variables
+export AWS_SDK_LOAD_CONFIG=1
 
 # HebCal
-if [[ -x /usr/local/bin/hebcal ]]; then
-	export HEBCAL_OPTS=' -T -r -o -s -S -Z -d -D -e -E -F -8 '
-	/usr/local/bin/hebcal
+if [[ -x /opt/homebrew/bin/hebcal ]]; then
+	export HEBCAL_OPTS='-T -r -o -s -S -Z -d -D -e -E -F -Y /Users/wgd/code/homedir/.hebcal-yz --lang he' 
+	/opt/homebrew/bin/hebcal
 fi
 
-# Set the tabstop to 4 on output.
+# Set terminal sanity
+COLUMNS=$(stty -a | sed -n 's/^speed .* \(.*\) columns;/\1/p')
+COLS=${COLUMNS}
 tabs -4
 
-# Set the default Git upstream interval check to one hour.
-CD_CHECK=3600
-
-# Prime the prompt via internal `cd` function.
+# Prime the prompt via internal `cd` function
 cd
 
