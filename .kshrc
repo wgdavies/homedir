@@ -226,11 +226,11 @@ is_gitrepo() {
     typeset _is_grdir=${PWD}
 
     while [[ ${_is_grdir} != "" ]]; do
-        [[ -d ${_is_grdir}/.git ]] && exit 0
+        [[ -d ${_is_grdir}/.git ]] && return 0
         _is_grdir=${_is_grdir%/*}
     done
 
-    exit 1
+    return 1
 }
 
 cd_checkupstream() {
@@ -238,21 +238,19 @@ cd_checkupstream() {
     typeset -i _cd_time=$(printf "%(%s)T" now)
 
     if (( CD_CHECK > 0 )) && (( (( _cd_time - _cd_file_time )) > CD_CHECK )); then
-        if git remote show origin | egrep -q 'out of date|next fetch will store'; then
-            print 1
-        else
-            print 0
-        fi
-
         touch ${CD_FILE}
+        print 1
+    else
+        print 0
     fi
 }
 
 typeset -a VCSINFO=( )
+typeset -a GITAB=( )
 
 cd() {
     typeset _cd_gs _cd_cwd _vcc _vccpref _vccpost
-    typeset -i _cd_gi
+    typeset -i _cd_gi _cd_cu
 
     if [[ ${1} == -d ]]; then
         if [[ -d ${2} ]]; then
@@ -288,12 +286,19 @@ cd() {
         if (( ${#VCSINFO[@]} < 2 )); then
             CURRDIR="$(printf "%sGit %s%s%s" "${COL_BLUE}" "${COL_YELLOW}" "${PWD##*/}" "${COL_NORM}")"
         else
-            BRANCH=$(git symbolic-ref HEAD)
-            BRANCH=${BRANCH:##*/}
+            BRANCH=$(git rev-parse --abbrev-ref HEAD)
             _cd_gs="$(git status 2>&1)"
             _cd_cwd="$(print ${PWD#$HOME/code} | tr -d "[:alnum:]_.-")${PWD##*/}"
             _cd_gi=$(egrep -c -v '^#' $(git rev-parse --show-toplevel)/.git/info/exclude)
-            _cd_gu=$(cd_checkupstream)
+            _cd_cu=$(cd_checkupstream)
+
+            if (( _cd_cu == 1 )); then
+                GITAB=( $(git rev-list --left-right --count ${BRANCH}...origin/${BRANCH}) )
+            else
+                if (( CD_CHECK == 0 )); then
+                    GITAB=( 0 0 )
+                fi
+            fi
 
             case ${VCSINFO[0]} in
                 'ssh:'|'http:'|'https:')
@@ -317,17 +322,15 @@ cd() {
                 SLINE="${COL_YELLOW}${COL_BOLD}${_cd_cwd}${COL_UNBOLD}${COL_NORM}"
             elif [[ "${_cd_gs}" =~ "Untracked files" ]]; then
                 SLINE="${COL_UBAR}${_cd_cwd}${COL_UNUBAR}${COL_NORM}"
-            elif (( _cd_gu != 0 )); then
-                BRANCH+="|BEHIND"
-                SLINE="${COL_RED=}${COL_UBAR}${_cd_cwd}${COL_UNUBAR}${COL_NORM}"
             else
                 SLINE="${COL_WHITE}${_cd_cwd}${COL_NORM}"
             fi
 
-            CURRDIR="$(printf "%sGit %s %s%s:%s \"%s\"" "${COL_BLUE}" ${VCSINFO[0]} "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${BRANCH}")"
+            CURRDIR="$(printf "%sGit %s %s%s:%s \"%s\" (%d|%d)" "${COL_BLUE}" ${VCSINFO[0]} "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${BRANCH}" ${GITAB[0]} ${GITAB[1]})"
         fi
     else
         VCSINFO=( 0 0 )
+        GITAB=( 0 0 )
         _cd_cwd=${PWD/$HOME/\~}
         CURRDIR="${COL_GREEN}$(print ${_cd_cwd} | tr -d "[:alnum:]_.-")${PWD##*/}${COL_NORM}"
     fi

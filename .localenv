@@ -1,5 +1,14 @@
 ## Local modifications particular to this host
 
+# Whether or how frequently to check upstream Git repos. A value of 0 disables
+# the upstream check. An int greater than 0 defines the minimum number of seconds
+# between checks. Other values are not allowed.
+export CD_CHECK=0
+
+if (( CD_CHECK > 0 )); then
+    print "NOTICE: Upstream Git checking is enabled. Ensure connectivity!"
+fi
+
 # Homebrew-managed Go environment
 [ -x /opt/homebrew/bin/go ] && export GOROOT=/opt/homebrew/Cellar/go/1.19/libexec
 [ -s ${GOROOT} ] && PATH+=:${GOROOT}/bin
