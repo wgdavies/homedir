@@ -326,7 +326,13 @@ cd() {
                 SLINE="${COL_WHITE}${_cd_cwd}${COL_NORM}"
             fi
 
-            CURRDIR="$(printf "%sGit %s %s%s:%s \"%s\" (%d|%d)" "${COL_BLUE}" ${VCSINFO[0]} "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${BRANCH}" ${GITAB[0]} ${GITAB[1]})"
+            if (( (( infocols + ${#VCSINFO[0]} + ${#VCSINFO[1]} )) > (( columns / 2 )) )); then
+                CURRDIR="$(printf "%sGit %s%s:%s \"%s\" (%d|%d)" \
+                  "${COL_BLUE}" "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${BRANCH}" ${GITAB[0]} ${GITAB[1]})"
+            else
+                CURRDIR="$(printf "%sGit %s %s%s:%s \"%s\" (%d|%d)" \
+                  "${COL_BLUE}" ${VCSINFO[0]} "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${BRANCH}" ${GITAB[0]} ${GITAB[1]})"
+            fi
         fi
     else
         VCSINFO=( 0 0 )
