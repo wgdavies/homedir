@@ -2,9 +2,11 @@
 	name = Walter G Davies
 	email = walter.g.davies@gmail.com
 [core]
-	excludesfile = ~/.gitignore_global
+	excludesfile = /Users/wgd/.gitignore_global
 	editor = nano
 [alias]
+	ptag = !git tag -f -a $1 -m $1 && git push --tags --force && git show --pretty=short --no-patch $1
+	ctag = rev-list -n 1
 	co = checkout
 	br = branch
 	ci = commit
@@ -16,23 +18,38 @@
 	last = log -1 HEAD
 	dt = difftool --dir-diff
 	log = log --graph --pretty=format:'%Cred%h%Creset %C(yellow)%an%d%Creset %s %Cgreen(%cr)%Creset' --date=relative
-	poll = "!git pull origin \"$(git rev-parse --abbrev-ref HEAD)\""
+	poll = !git fetch 2>&1 && git rev-list --left-right --count $(git rev-parse --abbrev-ref HEAD)...origin/$(git rev-parse --abbrev-ref HEAD)
+	hist = log --all --decorate --oneline --graph
+	nb = !git co -b $1 && git push -u origin $1
 [transfer]
 	fsckObjects = true
 [push]
 	default = current
+	autoSetupRemote = true
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
 	required = true
 	process = git-lfs filter-process
-# [difftool "sourcetree"]
-#	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-#	path = 
-# [mergetool "sourcetree"]
-#	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
-#	trustExitCode = true
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path = 
+[mergetool "sourcetree"]
+	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
 [merge]
 	tool = opendiff
 [diff]
 	tool = meld
+[pull]
+	rebase = false
+[init]
+	defaultBranch = main
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path = 
+[mergetool "sourcetree"]
+	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
+[url "ssh://git@bitbucket.org/avaneer"]
+	insteadOf = https://bitbucket.org/avaneer

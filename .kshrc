@@ -293,7 +293,12 @@ cd() {
             _cd_cu=$(cd_checkupstream)
 
             if (( _cd_cu == 1 )); then
-                GITAB=( $(git rev-list --left-right --count ${BRANCH}...origin/${BRANCH}) )
+                if ! git rev-list --left-right --count ${BRANCH}...origin/${BRANCH} > /dev/null 2>&1 ; then
+                    GITAB=( 0 0 )
+                else
+                    git fetch origin ${BRANCH} > /dev/null 2>&1
+                    GITAB=( $(git rev-list --left-right --count ${BRANCH}...origin/${BRANCH}) )
+                fi
             else
                 if (( CD_CHECK == 0 )); then
                     GITAB=( 0 0 )
