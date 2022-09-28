@@ -18,9 +18,9 @@
 	last = log -1 HEAD
 	dt = difftool --dir-diff
 	log = log --graph --pretty=format:'%Cred%h%Creset %C(yellow)%an%d%Creset %s %Cgreen(%cr)%Creset' --date=relative
-	poll = !git fetch 2>&1 && git rev-list --left-right --count $(git rev-parse --abbrev-ref HEAD)...origin/$(git rev-parse --abbrev-ref HEAD)
+	poll = !git fetch > /dev/null 2>&1 && git rev-list --left-right --count $(git rev-parse --abbrev-ref HEAD)...origin/$(git rev-parse --abbrev-ref HEAD)
 	hist = log --all --decorate --oneline --graph
-	nb = !git co -b $1 && git push -u origin $1
+	nb = !sh -c 'git checkout -b $1 && git push -u origin $1' -
 [transfer]
 	fsckObjects = true
 [push]
@@ -51,5 +51,6 @@
 [mergetool "sourcetree"]
 	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
 	trustExitCode = true
-[url "ssh://git@bitbucket.org/avaneer"]
-	insteadOf = https://bitbucket.org/avaneer
+## Hack for forcing SSH connexions over HTTPS.
+#[url "ssh://git@some.org/repo"]
+#	insteadOf = https://some.org/repo
