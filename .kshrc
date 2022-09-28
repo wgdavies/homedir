@@ -221,6 +221,8 @@ typeset WHOWHERE="$(whoami)${hn}"
 typeset INFOLINE="${SHELL}"
 typeset SLINE=""
 typeset BRANCH=""
+typeset COMMIT_ID=""
+typeset OLD_COMMIT_ID=""
 typeset -a VCSINFO=()
 typeset -a GITAB=()
 
@@ -248,13 +250,33 @@ cd_checkupstream() {
     typeset -i _cd_file_time=$(stat -f "%m" ${CD_FILE})
     typeset -i _cd_time=$(printf "%(%s)T" now)
     typeset -a _cd_cmds=( $(hist -l -n -N 1) )
+    typeset -a _cd_gitc=(
+      pull
+      push
+      commit
+    )
 
-    if (( CD_CHECK > 0 )) && (( (( _cd_time - _cd_file_time )) > CD_CHECK )) || \
-      [[ ${_cd_cmds[@]} =~ "git pull" ]] || [[ ${_cd_cmds[@]} =~ "git push" ]]; then
-        touch ${CD_FILE}
-        print 1
-    else
-        print 0
+    if (( CD_CHECK > 0 )); then
+        if (( (( _cd_time - _cd_file_time )) > CD_CHECK )); then
+            touch ${CD_FILE}
+            gitpoll
+        elif (( ${#GITAB[@]} < 2 )) || [[ -z ${GITAB[@]} ]]; then
+            touch ${CD_FILE}
+            gitpoll
+        elif [[ ${OLD_COMMIT_ID} != ${COMMIT_ID} ]]; then
+            touch ${CD_FILE}
+            gitpoll
+        else
+            for _cd_sub in ${_cd_gitc[@]}; do
+                if [[ ${_cd_cmd[@]} =~ "git ${_cd_sub}" ]]; then
+                    touch ${CD_FILE}
+                    gitpoll
+                    break
+                fi
+            done
+        fi
+
+        OLD_COMMIT_ID=${COMMIT_ID}
     fi
 }
 
@@ -292,19 +314,17 @@ cd() {
         _vccpref=${_vcc#git@}
         _vccpost=${_vcc##*/}
         VCSINFO=( ${_vccpref%%/*} ${_vccpost%.git} )
+        BRANCH=$(git rev-parse --abbrev-ref HEAD)
+        COMMIT_ID=$(git rev-list -n 1 ${BRANCH})
 
         if (( ${#VCSINFO[@]} < 2 )); then
             CURRDIR="$(printf "%sGit %s%s%s" "${COL_BLUE}" "${COL_YELLOW}" "${PWD##*/}" "${COL_NORM}")"
         else
-            BRANCH=$(git rev-parse --abbrev-ref HEAD)
             _cd_gs="$(git status 2>&1)"
             _cd_cwd="$(print ${PWD#$HOME/code} | tr -d "[:alnum:]_.-")${PWD##*/}"
             _cd_gi=$(egrep -c -v '^#' $(git rev-parse --show-toplevel)/.git/info/exclude)
-            _cd_cu=$(cd_checkupstream)
 
-            if (( _cd_cu == 1 )); then
-                gitpoll
-            fi
+            cd_checkupstream
 
             case ${VCSINFO[0]} in
                 'ssh:'|'http:'|'https:')
