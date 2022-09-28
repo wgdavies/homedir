@@ -221,6 +221,8 @@ typeset WHOWHERE="$(whoami)${hn}"
 typeset INFOLINE="${SHELL}"
 typeset SLINE=""
 typeset BRANCH=""
+typeset -a VCSINFO=()
+typeset -a GITAB=()
 
 is_gitrepo() {
     typeset _is_grdir=${PWD}
@@ -233,11 +235,22 @@ is_gitrepo() {
     return 1
 }
 
+gitpoll() {
+    git fetch origin ${BRANCH} > /dev/null 2>&1
+    if (( $? != 0 )); then
+        GITAB=( -1 -1 )
+     else
+        GITAB=( $(git rev-list --left-right --count ${BRANCH}...origin/${BRANCH}) )
+    fi
+}
+
 cd_checkupstream() {
     typeset -i _cd_file_time=$(stat -f "%m" ${CD_FILE})
     typeset -i _cd_time=$(printf "%(%s)T" now)
+    typeset -a _cd_cmds=( $(hist -l -n -N 1) )
 
-    if (( CD_CHECK > 0 )) && (( (( _cd_time - _cd_file_time )) > CD_CHECK )); then
+    if (( CD_CHECK > 0 )) && (( (( _cd_time - _cd_file_time )) > CD_CHECK )) || \
+      [[ ${_cd_cmds[@]} =~ "git pull" ]] || [[ ${_cd_cmds[@]} =~ "git push" ]]; then
         touch ${CD_FILE}
         print 1
     else
@@ -245,11 +258,8 @@ cd_checkupstream() {
     fi
 }
 
-typeset -a VCSINFO=( )
-typeset -a GITAB=( )
-
 cd() {
-    typeset _cd_gs _cd_cwd _vcc _vccpref _vccpost
+    typeset _cd_gs _cd_cwd _vcc _vccpref _vccpost _shrt_prmt _long_prmt
     typeset -i _cd_gi _cd_cu
 
     if [[ ${1} == -d ]]; then
@@ -293,16 +303,7 @@ cd() {
             _cd_cu=$(cd_checkupstream)
 
             if (( _cd_cu == 1 )); then
-                if ! git rev-list --left-right --count ${BRANCH}...origin/${BRANCH} > /dev/null 2>&1 ; then
-                    GITAB=( 0 0 )
-                else
-                    git fetch origin ${BRANCH} > /dev/null 2>&1
-                    GITAB=( $(git rev-list --left-right --count ${BRANCH}...origin/${BRANCH}) )
-                fi
-            else
-                if (( CD_CHECK == 0 )); then
-                    GITAB=( 0 0 )
-                fi
+                gitpoll
             fi
 
             case ${VCSINFO[0]} in
@@ -331,17 +332,29 @@ cd() {
                 SLINE="${COL_WHITE}${_cd_cwd}${COL_NORM}"
             fi
 
-            if (( (( infocols + ${#VCSINFO[0]} + ${#VCSINFO[1]} )) > (( columns / 2 )) )); then
-                CURRDIR="$(printf "%sGit %s%s:%s \"%s\" (%d|%d)" \
-                  "${COL_BLUE}" "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${BRANCH}" ${GITAB[0]} ${GITAB[1]})"
+            _shrt_prmt="$(printf "%sGit %s%s:%s \"%s\"" \
+              "${COL_BLUE}" "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${BRANCH}")"
+            _long_prmt="$(printf "%sGit %s %s%s:%s \"%s\"" \
+              "${COL_BLUE}" ${VCSINFO[0]} "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${BRANCH}")"
+
+            if (( CD_CHECK < 1 )); then
+                if (( (( infocols + ${#VCSINFO[0]} + ${#VCSINFO[1]} )) > (( columns / 2 )) )); then
+                    CURRDIR=${_shrt_prmt}
+                else
+                    CURRDIR=${_long_prmt}
+                fi
             else
-                CURRDIR="$(printf "%sGit %s %s%s:%s \"%s\" (%d|%d)" \
-                  "${COL_BLUE}" ${VCSINFO[0]} "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${BRANCH}" ${GITAB[0]} ${GITAB[1]})"
+                if (( (( infocols + ${#VCSINFO[0]} + ${#VCSINFO[1]} )) > (( columns / 2 )) )); then
+                    CURRDIR="${_shrt_prmt} (${GITAB[0]}|${GITAB[1]})"
+                else
+                    CURRDIR="${_long_prmt} (${GITAB[0]}|${GITAB[1]})"
+                    #CURRDIR="$(printf "%sGit %s %s%s:%s \"%s\" (%d|%d)" \
+                    #  "${COL_BLUE}" ${VCSINFO[0]} "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${BRANCH}" ${GITAB[0]} ${GITAB[1]})"
+                fi
             fi
         fi
     else
         VCSINFO=( 0 0 )
-        GITAB=( 0 0 )
         _cd_cwd=${PWD/$HOME/\~}
         CURRDIR="${COL_GREEN}$(print ${_cd_cwd} | tr -d "[:alnum:]_.-")${PWD##*/}${COL_NORM}"
     fi
