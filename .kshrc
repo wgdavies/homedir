@@ -110,7 +110,11 @@ function xdate {
 
     if (( ${#} > 0 )); then
         for _x_datearg in ${@}; do
-            if [[ ${_x_datearg} =~ [0-9,a-f,A-F] ]]; then
+            if (( ${#_x_datearg} > 8 )) || (( ${#_x_datearg} < 8 )); then
+                printf "error: %s is not a valid xdate string\n" ${_x_datearg}
+                _x_pdate=false
+                continue
+            elif [[ ${_x_datearg} =~ [0-9,a-f,A-F] ]]; then
                 if [[ ${_x_datearg} =~ 0x ]]; then
                     _x_datestamp=$(printf "%d" ${_x_datearg})
                 else
@@ -120,12 +124,13 @@ function xdate {
             else
                 _x_datestring=$(printf "%X" ${1})
             fi
+            print ${_x_datestring}
         done
     else
         _x_datestring=$(printf "%X" $(printf '%(%s)T' now))
+        print ${_x_datestring}
     fi
 
-    print ${_x_datestring}
 }
 
 function oldxdate {
