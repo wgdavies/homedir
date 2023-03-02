@@ -287,7 +287,7 @@ cd_checkupstream() {
 
 cd() {
     typeset _cd_gs _cd_cwd _vcc _vccpref _vccpost _shrt_prmt _long_prmt
-    typeset -i _cd_gi _cd_cu
+    typeset -i _cd_gi _cd_cu _infolen
 
     if [[ ${1} == -d ]]; then
         if [[ -d ${2} ]]; then
@@ -369,7 +369,8 @@ cd() {
                     CURRDIR=${_long_prmt}
                 fi
             else
-                if (( (( infocols + ${#VCSINFO[0]} + ${#VCSINFO[1]} )) > (( columns / 2 )) )); then
+                (( _infolen = infocols + ${#VCSINFO[0]} + ${#VCSINFO[1]} + ${#BRANCH} ))
+                if (( _infolen > (( columns / 2 )) )); then
                     CURRDIR="${_shrt_prmt} (${GITAB[0]}|${GITAB[1]})"
                 else
                     CURRDIR="${_long_prmt} (${GITAB[0]}|${GITAB[1]})"
