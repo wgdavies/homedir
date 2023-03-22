@@ -243,6 +243,8 @@ is_gitrepo() {
 }
 
 gitpoll() {
+    touch ${CD_FILE}
+
     git fetch origin ${BRANCH} > /dev/null 2>&1
     if (( $? != 0 )); then
         GITAB=( -1 -1 )
@@ -263,18 +265,14 @@ cd_checkupstream() {
 
     if (( CD_CHECK > 0 )); then
         if (( (( _cd_time - _cd_file_time )) > CD_CHECK )); then
-            touch ${CD_FILE}
             gitpoll
         elif (( ${#GITAB[@]} < 2 )) || [[ -z ${GITAB[@]} ]]; then
-            touch ${CD_FILE}
             gitpoll
         elif [[ ${OLD_COMMIT_ID} != ${COMMIT_ID} ]]; then
-            touch ${CD_FILE}
             gitpoll
         else
             for _cd_sub in ${_cd_gitc[@]}; do
                 if [[ ${_cd_cmd[@]} =~ "git ${_cd_sub}" ]]; then
-                    touch ${CD_FILE}
                     gitpoll
                     break
                 fi
