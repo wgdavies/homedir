@@ -312,9 +312,10 @@ cd() {
             CURRDIR="$(printf "%s%s %sSVN v.%s%s" "${COL_BLUE}" ${VCSINFO[0]} "${COL_GREEN}" ${VCSINFO[1]} "${COL_NORM}")"
         fi
     elif [[ ${PWD} =~ /.git ]]; then
-        _pdng=${PWD/\/.git}
-        _pd=${_pdng##*/}
-        CURRDIR="$(printf "%s%s/%s%s.git%s%s" "${COL_BLUE}" "${_pd}" "${COL_BOLD}" "${COL_RED}" "${COL_UNBOLD}" "${COL_NORM}")"
+        _pd=${PWD%/.git*} 
+        _ppd=${_pd##*/}
+        _pcd=${PWD##*/.git}
+        CURRDIR="$(printf "%s%s/%s%s.git%s%s%s" "${COL_BLUE}" "${_ppd}" "${COL_BOLD}" "${COL_RED}" "${COL_UNBOLD}" "${_pcd}" "${COL_NORM}")"
     elif $(is_gitrepo); then
         _vcc=$(git config remote.origin.url)
         _vccpref=${_vcc#http*\/\/}
