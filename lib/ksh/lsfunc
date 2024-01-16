@@ -10,33 +10,40 @@
 # 'break'), few (if any) calls to external binaries, self-documented, &c.
 #
 function lsfunc {
-    typeset -i LISTALL=0
+    typeset -i LISTALL=0 usercnt=0
     typeset argc userfunc usercmd
-    
+
     while getopts -a lsfunc "ha" argc; do
 	case ${argc} in
 	    h) print "list available functions" && return ;;
 	    a) (( LISTALL = 1 )) ;;
 	esac
     done
-    
+
     if [[ -d ~/lib/ksh ]]; then
 	if (( LISTALL == 0 )); then
-	    for userfunc in ~/lib/ksh/*; do
-		if [[ -f ${userfunc} ]] && [[ ! ${userfunc} =~ README ]]; then
+            for userfunc in ~/lib/ksh/*; do
+		if [[ -f ${userfunc} ]] && [[ ! ${userfunc} =~ README ]] \
+		       && [[ ! -d ${userfunc} ]] && [[ -L ${userfunc} ]]; then
 		    usercmd=${userfunc##*/}
 		    if type ${usercmd} 2>&1 > /dev/null; then
+                        (( usercnt++ ))
 			printf "%s: %s\n" "${usercmd}" "$(${usercmd} -h)"
+		    else
+		        print -u2 "WARNING: ${userfunc} available but not loaded"
 		    fi
-		else
-		    print -u2 "WARNING: ${userfunc} available but not loaded"
-		fi
+                fi
 	    done
 	else
 	    for userfunc in $(find ~/lib/ksh -type f -print); do
+                (( usercnt++ ))
 		printf "${userfunc} "
 		( source ${userfunc} && ${userfunc##*/} -h )
 	    done
 	fi
+    fi
+
+    if (( usercnt == 0 )); then
+        print -u2 "NOTICE: no user functions were found or loaded"
     fi
 }
