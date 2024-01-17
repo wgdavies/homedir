@@ -4,7 +4,10 @@ function wb {
     typeset -i _wb_len=0 _wb_mode=0
     typeset _wb_dir="" _wb_arg="-v"
 
-    if (( ${#_wb_all[@]} == 0 )); then
+    if [[ ${_wb_all[@]} =~ -h ]]; then
+        print "show What Branch a Git repo/directory is on"
+        return
+    elif (( ${#_wb_all[@]} == 0 )); then
         _wb_all=( "." )
     elif [[ ${_wb_all[0]} == -a ]]; then
         (( _wb_mode = 1 ))

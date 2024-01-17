@@ -5,7 +5,10 @@ function wr {
     typeset -i _wr_len=0
     typeset _wr_dir
 
-    if (( ${#_wr_all[@]} == 0 )); then
+    if [[ ${_wr_all[@]} =~ -h ]]; then
+        print "show What Repo a git repo/directory points to for upstream"
+        return
+    elif (( ${#_wr_all[@]} == 0 )); then
 	_wr_all=( "." )
     fi
 
