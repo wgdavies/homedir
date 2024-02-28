@@ -1,6 +1,7 @@
 [user]
-	name = Walter G Davies
-	email = walter.g.davies@gmail.com
+	name = Walter G Davies - ASCCON
+	email = wgd@asccon.co
+	signingkey = 854A266F4D5A6AC1
 [core]
 	excludesfile = /Users/wgd/.gitignore_global
 	editor = nano
@@ -54,3 +55,5 @@
 ## Hack for forcing SSH connexions over HTTPS.
 #[url "ssh://git@some.org/repo"]
 #	insteadOf = https://some.org/repo
+[commit]
+	gpgsign = true
