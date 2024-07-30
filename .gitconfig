@@ -52,8 +52,8 @@
 [mergetool "sourcetree"]
 	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
 	trustExitCode = true
-## Hack for forcing SSH connexions over HTTPS.
-#[url "ssh://git@some.org/repo"]
-#	insteadOf = https://some.org/repo
 [commit]
 	gpgsign = true
+## Hack for forcing SSH connexions over HTTPS.
+[url "ssh://git@github.com/"]
+	insteadOf = https://github.com/
