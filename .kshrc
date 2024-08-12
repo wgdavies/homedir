@@ -59,13 +59,15 @@ typeset -x CD_CHECK CD_FILE
 # Continued general aliases
 alias la='ls -a'
 alias lf='ls -F'
+alias lr='ls -R'
 alias ll='ls -l'
 alias l.='ls -l ${PWD}'
 alias lsd='ls -ld'
 alias lm='/bin/ls'
 alias lt='ls -t'
 alias llt='ls -lcr'
-alias lrt='ls -lctr'
+alias lrt='ls -lcrt'
+alias ltr='ls -lctr'
 alias pwe='openssl enc -aes-256-cbc -salt -in ~/.pw.txt -out ~/.pw.enc && rm ~/.pw.txt'
 alias pwc='openssl enc -aes-256-cbc -d -in ~/.pw.enc -out ~/.pw.txt'
 alias wn='printf "%(%W)T\n" now'
@@ -282,15 +284,19 @@ cd_checkupstream() {
     fi
 }
 
+typeset _cd_dir
+
 cd() {
     typeset _cd_gs _cd_cwd _vcc _vccpref _vccpost _shrt_prmt _long_prmt
     typeset -i _cd_gi _cd_cu _infolen
+
+    _cd_dir="${PWD}"
 
     if [[ ${1} == -d ]]; then
         if [[ -d ${2} ]]; then
             print -u2 "directory ${2} exists"
         else
-            mkdir "${2}"
+            mkdir -p "${2}"
             print -u2 "created directory ${2}"
         fi
 
@@ -394,6 +400,10 @@ cd() {
     fi
 
     command cd .
+}
+
+cdb() {
+    cd ${_cd_dir}
 }
 
 getdirstat() {
