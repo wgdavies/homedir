@@ -227,11 +227,15 @@ typeset STRATA="$(strata)"
 typeset WHOWHERE="$(whoami)${hn}"
 typeset INFOLINE="${SHELL}"
 typeset SLINE=""
-typeset BRANCH=""
-typeset COMMIT_ID=""
-typeset OLD_COMMIT_ID=""
+# poopytattiandeellieandselahandmommypoopyfamilyhahahah
 typeset -a VCSINFO=()
-typeset -a GITAB=()
+
+typeset -C GIT=(
+    typeset -x branch=""
+    typeset cid=""
+    typeset pcid=""
+    typeset -a ab=()
+)
 
 is_gitrepo() {
     typeset _is_grdir=${PWD}
@@ -247,11 +251,11 @@ is_gitrepo() {
 gitpoll() {
     touch ${CD_FILE}
 
-    git fetch origin ${BRANCH} > /dev/null 2>&1
+    git fetch origin ${GIT.branch} > /dev/null 2>&1
     if (( $? != 0 )); then
-        GITAB=( -1 -1 )
+        GIT.ab=( -1 -1 )
      else
-        GITAB=( $(git rev-list --left-right --count ${BRANCH}...origin/${BRANCH}) )
+        GIT.ab=( $(git rev-list --left-right --count ${GIT.branch}...origin/${GIT.branch}) )
     fi
 }
 
@@ -268,9 +272,9 @@ cd_checkupstream() {
     if (( CD_CHECK > 0 )); then
         if (( (( _cd_time - _cd_file_time )) > CD_CHECK )); then
             gitpoll
-        elif (( ${#GITAB[@]} < 2 )) || [[ -z ${GITAB[@]} ]]; then
+        elif (( ${#GIT.ab[@]} < 2 )) || [[ -z ${GIT.ab[@]} ]]; then
             gitpoll
-        elif [[ ${OLD_COMMIT_ID} != ${COMMIT_ID} ]]; then
+        elif [[ ${OLD_GIT.cid} != ${GIT.cid} ]]; then
             gitpoll
         else
             for _cd_sub in ${_cd_gitc[@]}; do
@@ -281,7 +285,7 @@ cd_checkupstream() {
             done
         fi
 
-        OLD_COMMIT_ID=${COMMIT_ID}
+        OLD_GIT.cid=${GIT.cid}
     fi
 }
 
@@ -318,7 +322,7 @@ cd() {
             CURRDIR="$(printf "%s%s %sSVN v.%s%s" "${COL_BLUE}" ${VCSINFO[0]} "${COL_GREEN}" ${VCSINFO[1]} "${COL_NORM}")"
         fi
     elif [[ ${PWD} =~ /.git ]]; then
-        _pd=${PWD%/.git*} 
+        _pd=${PWD%/.git*}
         _ppd=${_pd##*/}
         _pcd=${PWD##*/.git}
         CURRDIR="$(printf "%s%s/%s%s.git%s%s%s" "${COL_BLUE}" "${_ppd}" "${COL_BOLD}" "${COL_RED}" "${COL_UNBOLD}" "${_pcd}" "${COL_NORM}")"
@@ -328,8 +332,8 @@ cd() {
         _vccpref=${_vcc#git@}
         _vccpost=${_vcc##*/}
         VCSINFO=( ${_vccpref%%/*} ${_vccpost%.git} )
-        BRANCH=$(git rev-parse --abbrev-ref HEAD)
-        COMMIT_ID=$(git rev-list -n 1 ${BRANCH})
+        GIT.branch=$(git rev-parse --abbrev-ref HEAD)
+        GIT.cid=$(git rev-list -n 1 ${GIT.branch})
 
         if (( ${#VCSINFO[@]} < 2 )); then
             CURRDIR="$(printf "%sGit %s%s%s" "${COL_BLUE}" "${COL_YELLOW}" "${PWD##*/}" "${COL_NORM}")"
@@ -351,10 +355,10 @@ cd() {
             fi
 
             if [[ "${_cd_gs}" =~ "unmerged paths" ]]; then
-                BRANCH+='|MERGING'
+                GIT.branch+='|MERGING'
                 SLINE="${COL_GREEN}${_cd_cwd}${COL_NORM}"
             elif [[ "${_cd_gs}" =~ "have diverged" ]]; then
-                BRANCH+='|DIVERGENT'
+                GIT.branch+='|DIVERGENT'
                 SLINE="${COL_YELLOW}${COL_UBAR}${_cd_cwd}${COL_UNUBAR}${COL_NORM}"
             elif [[ "${_cd_gs}" =~ "modified" ]] || [[ "${_cd_gs}" =~ "Changes to be committed" ]]; then
                 SLINE="${COL_RED}${COL_BOLD}${_cd_cwd}${COL_UNBOLD}${COL_NORM}"
@@ -367,9 +371,9 @@ cd() {
             fi
 
             _shrt_prmt="$(printf "%sGit %s%s:%s \"%s\"" \
-              "${COL_BLUE}" "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${BRANCH}")"
+              "${COL_BLUE}" "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${GIT.branch}")"
             _long_prmt="$(printf "%sGit %s %s%s:%s \"%s\"" \
-              "${COL_BLUE}" ${VCSINFO[0]} "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${BRANCH}")"
+              "${COL_BLUE}" ${VCSINFO[0]} "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${GIT.branch}")"
 
             if (( CD_CHECK < 1 )); then
                 if (( (( infocols + ${#VCSINFO[0]} + ${#VCSINFO[1]} )) > (( columns / 2 )) )); then
@@ -378,13 +382,13 @@ cd() {
                     CURRDIR=${_long_prmt}
                 fi
             else
-                (( _infolen = infocols + ${#VCSINFO[0]} + ${#VCSINFO[1]} + ${#BRANCH} ))
+                (( _infolen = infocols + ${#VCSINFO[0]} + ${#VCSINFO[1]} + ${#GIT.branch} ))
                 if (( _infolen > (( columns / 2 )) )); then
-                    CURRDIR="${_shrt_prmt} (${GITAB[0]}|${GITAB[1]})"
+                    CURRDIR="${_shrt_prmt} (${GIT.ab[0]}|${GIT.ab[1]})"
                 else
-                    CURRDIR="${_long_prmt} (${GITAB[0]}|${GITAB[1]})"
+                    CURRDIR="${_long_prmt} (${GIT.ab[0]}|${GIT.ab[1]})"
                     #CURRDIR="$(printf "%sGit %s %s%s:%s \"%s\" (%d|%d)" \
-                    #  "${COL_BLUE}" ${VCSINFO[0]} "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${BRANCH}" ${GITAB[0]} ${GITAB[1]})"
+                    #  "${COL_BLUE}" ${VCSINFO[0]} "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${GIT.branch}" ${GIT.ab[0]} ${GIT.ab[1]})"
                 fi
             fi
         fi
