@@ -39,11 +39,13 @@ if [[ ${OS} == FreeBSD ]];then
     alias ls='ls -G -D "%Y-%m-%d %H:%M"'
 elif [[ ${OS} == Darwin ]]; then
     typeset MD5=$(which md5)
+    typeset statm='-f "%m"'
     alias md5sum='md5 -r'
     alias ls='ls -G'
     alias eject='diskutil eject'
 elif [[ ${OS} =~ Linux ]]; then
     typeset MD5=$(which md5sum)
+    typeset statm='-c "%Y"'
     alias ls='ls --color'
     export TIME_STYLE=long-iso
 else
@@ -260,7 +262,7 @@ gitpoll() {
 }
 
 cd_checkupstream() {
-    typeset -i _cd_file_time=$(stat -f "%m" ${CD_FILE})
+    typeset -i _cd_file_time=$(stat ${statm} ${CD_FILE})
     typeset -i _cd_time=$(printf "%(%s)T" now)
     typeset -a _cd_cmds=( $(hist -l -n -N 1) )
     typeset -a _cd_gitc=(
