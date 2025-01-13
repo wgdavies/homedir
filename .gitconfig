@@ -2,6 +2,7 @@
 	name = Walter G Davies - ASCCON
 	email = wgd@asccon.co
 	signingkey = 854A266F4D5A6AC1
+	useConfigOnly = true
 [core]
 	excludesfile = /Users/wgd/.gitignore_global
 	editor = nano
