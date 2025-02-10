@@ -1,0 +1,7 @@
+[user]
+	name = Walter G Davies - ASCCON
+	email = wgdavies@asccon.co
+	signingkey = 4D5A6AC1
+
+[url "git@github.com-ASCCON"]
+	insteadOf = git@github.com
