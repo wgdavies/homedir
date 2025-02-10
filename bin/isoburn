@@ -1,0 +1,67 @@
+#!/bin/ksh
+
+PATH=/bin:/usr/bin:/sbin:/usr/sbin
+
+typeset progname="isoburn"
+typeset iso="${1}"
+typeset slc="${2}"
+typeset -i idx=0
+typeset -a DLIST=( $(diskutil list -plist external                             \
+			| grep -A1 -B1 DeviceIdentifier                        \
+			| egrep -B2 'disk[[:digit:]]s[[:digit:]]'              \
+			| egrep -v 'key>|^--$'                                 \
+			| sed -e 's/^[[:space:]]*<string>//g;s/<\/string>//g') )
+
+function usage {
+	printf "usage: %s [ list ] | [ [ ISO image ] [ disk slice ] ]\n" ${progname}
+	exit 0
+}
+
+if (( $(id -u) != 0 )); then
+	print "ERROR: must be run with root permissions"
+	exit 1
+fi
+
+if (( ${#@} == 0 )) || [[ ${iso} =~ "-h" ]] || [[ ${iso} =~ "help" ]]; then
+	usage
+elif [[ ${iso} == list ]]; then
+	if (( ${#DLIST[@]} == 0 )); then
+		print "ERROR: no USB devices detected"
+		exit 1
+	elif (( ! ${#DLIST[@]} % 2 )); then
+		print "ERROR: mismatched disk slice list"
+		exit 1
+	else
+		for (( idx = 0 ; idx < ${#DLIST[@]} ; ++idx )); do
+			(( idx % 2 )) && printf "%s : %s\n" ${DLIST[$idx]} ${DLIST[$idx-1]}
+		done
+	fi
+else
+	if [[ -f ${iso} ]] && [[ -b /dev/${slc} ]]; then
+		printf "Unmounting the selected USB device... "
+		diskutil unmount /dev/${slc} > /dev/null 2>&1
+		if (( $? != 0 )); then
+			printf "\n"
+			print "ERROR: USB device not mounted properly"
+			exit 1
+		else
+			printf "done.\n"
+		fi
+
+		printf "Burning %s to %s... " ${iso} ${slc}
+
+		typeset -a dout=( $(dd if=${iso} of=/dev/r${slc} bs=1m 2>&1) )
+
+		if (( $? == 0 )); then
+			printf "completed %dMB ISO copy to USB.\n" $(( ${dout[0]} / 1024 / 1024 ))
+			printf "Please remove the selected USB device.\n"
+		else
+			printf "\n"
+			print "ERROR: ISO not created successfully on USB"
+		fi
+	else
+		print "ERROR: unable to find ISO ${iso} or destination /dev/${slc}"
+		exit 1
+	fi
+fi
+
