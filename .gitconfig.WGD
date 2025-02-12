@@ -2,6 +2,7 @@
 	name = Walter G Davies
 	email = wgdavies@protonmail.com
 	signingkey = 9A399CC6
+	alias = WGD
 
 [url "git@github.com-WGD"]
 	insteadOf = git@github.com

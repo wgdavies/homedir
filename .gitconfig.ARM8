@@ -2,6 +2,7 @@
 	name = Walter G Davies - Armament8
 	email = wgdavis@armament8.com
 	signingkey = 5CF03C69
+	alias = ARM8
 
 [url "git@github.com-ARM8"]
 	insteadOf = git@github.com

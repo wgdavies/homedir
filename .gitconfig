@@ -4,13 +4,13 @@
 [commit]
 	gpgsign = true
 
-[includeIf "gitdir:~/code/Armament8/"]
+[includeIf "gitdir:~/code/ARM8/"]
 	path = ~/.gitconfig.ARM8
 
-[includeIf "gitdir:~/code/ASCCON/"]
+[includeIf "gitdir:~/code/ASC/"]
 	path = ~/.gitconfig.ASC
 
-[includeIf "gitdir:~/code/"]
+[includeIf "gitdir:~/code/WGD/"]
 	path = ~/.gitconfig.WGD
 
 [user]

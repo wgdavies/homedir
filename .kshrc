@@ -236,6 +236,7 @@ typeset -C GIT=(
     typeset -x branch=""
     typeset cid=""
     typeset pcid=""
+    typeset alias=""
     typeset -a ab=()
 )
 
@@ -336,9 +337,14 @@ cd() {
         VCSINFO=( ${_vccpref%%/*} ${_vccpost%.git} )
         GIT.branch=$(git rev-parse --abbrev-ref HEAD)
         GIT.cid=$(git rev-list -n 1 ${GIT.branch})
+        GIT.alias=$(git config --get user.alias)
+
+        if [[ -z ${GIT.alias} ]]; then
+            GIT.alias="Git"
+        fi
 
         if (( ${#VCSINFO[@]} < 2 )); then
-            CURRDIR="$(printf "%sGit %s%s%s" "${COL_BLUE}" "${COL_YELLOW}" "${PWD##*/}" "${COL_NORM}")"
+            CURRDIR="$(printf "%s%s %s%s%s" "${COL_BLUE}" "${GIT.alias}" "${COL_YELLOW}" "${PWD##*/}" "${COL_NORM}")"
         else
             _cd_gs="$(git status 2>&1)"
             _cd_cwd="$(print ${PWD#$HOME/code} | tr -d "[:alnum:]_.-")${PWD##*/}"
@@ -372,10 +378,10 @@ cd() {
                 SLINE="${COL_WHITE}${_cd_cwd}${COL_NORM}"
             fi
 
-            _shrt_prmt="$(printf "%sGit %s%s:%s \"%s\"" \
-              "${COL_BLUE}" "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${GIT.branch}")"
-            _long_prmt="$(printf "%sGit %s %s%s:%s \"%s\"" \
-              "${COL_BLUE}" ${VCSINFO[0]} "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${GIT.branch}")"
+            _shrt_prmt="$(printf "%s%s %s%s:%s \"%s\"" \
+              "${COL_BLUE}" "${GIT.alias}" "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${GIT.branch}")"
+            _long_prmt="$(printf "%s%s %s %s%s:%s \"%s\"" \
+              "${COL_BLUE}" "${GIT.alias}" ${VCSINFO[0]} "${COL_YELLOW}" ${VCSINFO[1]} "${SLINE}" "${GIT.branch}")"
 
             if (( CD_CHECK < 1 )); then
                 if (( (( infocols + ${#VCSINFO[0]} + ${#VCSINFO[1]} )) > (( columns / 2 )) )); then
