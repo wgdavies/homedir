@@ -5,7 +5,7 @@
 	gpgsign = true
 
 [includeIf "gitdir:~/code/Armament8/"]
-	path = ~/.gitconfig.Armament8
+	path = ~/.gitconfig.ARM8
 
 [includeIf "gitdir:~/code/ASCCON/"]
 	path = ~/.gitconfig.ASCCON
