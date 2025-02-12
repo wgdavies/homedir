@@ -8,7 +8,7 @@
 	path = ~/.gitconfig.ARM8
 
 [includeIf "gitdir:~/code/ASCCON/"]
-	path = ~/.gitconfig.ASCCON
+	path = ~/.gitconfig.ASC
 
 [includeIf "gitdir:~/code/"]
 	path = ~/.gitconfig.WGD
