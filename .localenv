@@ -9,33 +9,48 @@ if (( CD_CHECK > 0 )); then
     print "NOTICE: Upstream Git checking is enabled. Ensure connectivity!"
 fi
 
-# Homebrew-managed Go environment
-[ -x /opt/homebrew/bin/go ] && export GOROOT=/opt/homebrew/Cellar/go/1.19/libexec
-[ -s ${GOROOT} ] && PATH+=:${GOROOT}/bin
-export GOPATH=~/code/go:${GOROOT}
-
-# Updates to PATH variable for Go, &c
-typeset -a BINPATHS=(
-    /opt/homebrew/bin
-    ~/bin
-    ~/code/bin
-    ~/code/go/bin
+# Add Go environment variables, if appropriate.
+typeset -a GO_PATHS=(
+	/opt/homebrew
+	/usr/local/go
 )
-for binpath in ${BINPATHS[@]}; do
-    [ -d ${binpath} ] && PATH+=:${binpath}
+
+for _gopath in ${GO_PATHS[@]}; do
+	if [ -x ${_gopath}/bin/go ]; then
+		export GOROOT=${_gopath}
+	fi
 done
 
+if [ -s ${GOROOT} ]; then
+	GOPATH=${GOROOT}
+	PATH+=${GOPATH}/bin
+else
+	print -u2 "NOTICE: Go installation not found."
+fi
+
+# Update local PATH variable.
+[ -d ~/bin ] && PATH+=~/bin
+
+# Determine which VT we're on, if any....
 typeset mytty=$(/usr/bin/tty)
 
 if [[ ! $(typeset -r) =~ HIST ]]; then
     export HISTSIZE=32767
-    export HISTFILE=~/.hist.${mytty##*/}
+
+    if [[ ! ${mytty} =~ /dev/ ]]; then
+        export HISTFILE=~/.hist.notty
+    else
+        export HISTFILE=~/.hist.${mytty##*/}
+        # Sign Git commits
+        export GPG_TTY=${mytty}
+
+    fi
 	
     touch ${HISTFILE}
 fi
 
 # AWS CLI variables
-export AWS_SDK_LOAD_CONFIG=1
+#export AWS_SDK_LOAD_CONFIG=1
 
 # HebCal
 if [[ -x /opt/homebrew/bin/hebcal ]]; then
@@ -47,6 +62,9 @@ fi
 COLUMNS=$(stty -a | sed -n 's/^speed .* \(.*\) columns;/\1/p')
 COLS=${COLUMNS}
 tabs -4
+
+# Set the date format on long list output to sanity.
+alias ls="ls -D '%Y-%m-%d %H:%M'"
 
 # Prime the prompt via internal `cd` function
 cd
