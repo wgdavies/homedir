@@ -1,0 +1,16 @@
+#!/bin/ksh
+
+case $1 in
+	on|enable)
+		sudo networksetup -setv6off Ethernet
+		sudo networksetup -setv6off Wi-Fi
+		;;
+	off|disable)
+		sudo networksetup -setv6off Ethernet
+		sudo networksetup -setv6off Wi-Fi
+		;;
+	*)
+		print "$(basename $0) [ on | enable ] [ off | disable ]"
+		;;
+esac
+
