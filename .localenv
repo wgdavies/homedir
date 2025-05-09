@@ -10,10 +10,12 @@ if (( CD_CHECK > 0 )); then
 fi
 
 # Add Go environment variables, if appropriate.
+export GOPATH=~/code/Go
+
 typeset -a GO_PATHS=(
-	/opt/homebrew
 	/usr/local/go
 )
+#	/opt/homebrew
 
 for _gopath in ${GO_PATHS[@]}; do
 	if [ -x ${_gopath}/bin/go ]; then
@@ -21,15 +23,18 @@ for _gopath in ${GO_PATHS[@]}; do
 	fi
 done
 
-if [ -s ${GOROOT} ]; then
-	GOPATH=${GOROOT}
-	PATH+=${GOPATH}/bin
+if [[ -s ${GOROOT} ]] && [[ -x ${GOPATH} ]]; then
+	PATH+=:${GOROOT}/bin
 else
 	print -u2 "NOTICE: Go installation not found."
 fi
 
 # Update local PATH variable.
-[ -d ~/bin ] && PATH+=~/bin
+[ -d ~/bin ] && PATH+=:~/bin
+[ -d /opt/homebrew ] && PATH+=:/opt/homebrew/bin:/opt/homebrew/sbin
+
+# Python
+PATH+=:~/.local/bin
 
 # Determine which VT we're on, if any....
 typeset mytty=$(/usr/bin/tty)
@@ -64,7 +69,8 @@ COLS=${COLUMNS}
 tabs -4
 
 # Set the date format on long list output to sanity.
-alias ls="ls -D '%Y-%m-%d %H:%M'"
+# ...this line should already be defined in .kshrc...?
+#alias ls="ls -G -D '%Y-%m-%d %H:%M'"
 
 # Prime the prompt via internal `cd` function
 cd
