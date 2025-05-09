@@ -1,0 +1,26 @@
+#!/bin/ksh
+#
+# s2c - Program to rename Go files from snake-case to camel-case
+
+PATH=/bin:/usr/bin
+
+typeset -i i=0     # array indexer
+typeset -a ra=()   # array of characters to replace
+typeset -u n=""    # auto-uppercase assigned character(s)
+typeset gofile=""  # original Go file name
+typeset newfile="" # replacement file name
+
+for gofile in *_*.go; do
+	ra=( $(print ${gofile} | egrep -o '_.' | tr -d '_') )
+	newfile="${gofile}"
+
+	for (( i = 0 ; i < ${#ra[@]} ; ++i )); do
+		n=${ra[$i]}
+		newfile="${newfile/_${ra[$i]}/${n}}"
+	done
+
+	if (( i == ${#ra[@]} )); then
+		mv -v ${gofile} ${newfile}
+	fi
+done
+
