@@ -1,0 +1,24 @@
+#!/usr/bin/ksh
+#
+# pkginfo - Debian command to just show the Description field for APT packages.
+
+PATH=/usr/bin
+
+typeset -a pkgs=( ${@} )
+typeset -i i=0
+
+if (( ${#pkgs[@]} > 0 )); then
+	for (( i = 0 ; i < ${#pkgs[@]} ; i++ )); do
+		printf "\n> %s:\n" ${pkgs[$i]}
+		apt show ${1} 2>/dev/null | awk '/Description:/,/^$/'
+
+		if (( $? != 0 )); then
+			print -u2 "ERROR: package ${PKG} not found"
+			return 1
+		fi
+	done
+else
+	print -u2 "ERROR: must supply package name to query."
+	return 1
+fi
+
