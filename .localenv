@@ -72,6 +72,13 @@ tabs -4
 # ...this line should already be defined in .kshrc...?
 #alias ls="ls -G -D '%Y-%m-%d %H:%M'"
 
+# Help the SSH key daemon find it's stuff....
+if [[ -d ~/.ssh/config.d ]]; then
+        for _key in $(sed -n 's/IdentityFile \(.*\)$/\1/p' ~/.ssh/config.d/* | sort | uniq); do
+                ssh-add ${_key}
+        done
+fi
+
 # Prime the prompt via internal `cd` function
 cd
 
