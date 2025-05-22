@@ -1,0 +1,10 @@
+#!/bin/ksh
+
+for (( i = 0 ; i < 128 ; i++ )); do
+	printf "0x%03d: '%s'\t" ${i} $(printf "\x${i}")
+
+	if (( (( i % 8 )) == 0 )) || (( i >= 127 )); then
+		printf "\n"
+	fi
+done
+
